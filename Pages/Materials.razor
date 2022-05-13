@@ -1,0 +1,56 @@
+@page "/materials"
+
+<PageTitle>Materials</PageTitle>
+
+@using NotAnotherBasePlanner.Data
+@inject MaterialService MaterialService
+
+<h1>Materials</h1>
+
+<p>List of all materials</p>
+
+@if (materials == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+    <thead>
+        <tr>
+            <th>Ticker</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Weight</th>
+            <th>Volume</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var material in materials)
+            {
+                <tr>
+                    <td>@material.Ticker</td>
+                    <td>@material.Name</td>
+                    <td>@material.CategoryName</td>
+                    <td>@material.Weight</td>
+                    <td>@material.Volume</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Material[]? materials;
+
+    protected override async Task OnInitializedAsync()
+    {
+        materials = await MaterialService.GetMaterialsAsync();
+
+        if (materials == null || materials.Length == 0)
+        {
+            MaterialService.UpdateAllMaterialsFromFIO();
+            materials = await MaterialService.GetMaterialsAsync();
+        }
+    }
+}

@@ -1,0 +1,54 @@
+@page "/building"
+
+<PageTitle>Buildings</PageTitle>
+
+@using NotAnotherBasePlanner.Data
+@inject BuildingService buildingService
+
+<h1>Buildings</h1>
+
+<p>List of all buildings</p>
+
+@if (buildings == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+    <thead>
+        <tr>
+            <th>Ticker</th>
+            <th>Name</th>
+            <th>Expertise</th>
+            <th>AreaCost</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var building in buildings)
+            {
+                <tr>
+                    <td>@building.Ticker</td>
+                    <td>@building.Name</td>
+                    <td>@building.Expertise</td>
+                    <td>@building.AreaCost</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Building[]? buildings;
+
+    protected override async Task OnInitializedAsync()
+    {
+        buildings = await buildingService.GetBuildingsAsync();
+
+        if (buildings == null || buildings.Length == 0)
+        {
+            buildingService.UpdateAllBuildingsFromFIO();
+            buildings = await buildingService.GetBuildingsAsync();
+        }
+    }
+}

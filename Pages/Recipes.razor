@@ -1,0 +1,54 @@
+@page "/recipe"
+
+<PageTitle>Recipes</PageTitle>
+
+@using NotAnotherBasePlanner.Data
+@inject RecipeService RecipeService
+
+<h1>Recipes</h1>
+
+<p>List of all recipes</p>
+
+@if (recipes == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+    <thead>
+        <tr>
+            <th>Recipe Name</th>
+            <th>Building</th>
+            <th>Inputs</th>
+            <th>Outputs</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var recipe in recipes)
+            {
+                <tr>
+                    <td>@recipe.RecipeName</td>
+                    <td>@recipe.BuildingTicker</td>
+                    <td>@string.Join(',',recipe.Inputs)</td>
+                    <td>@string.Join(',',recipe.Outputs)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Recipe[]? recipes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        recipes = await RecipeService.GetRecipesAsync();
+
+        if (recipes == null || recipes.Length == 0)
+        {
+            RecipeService.UpdateAllRecipesFromFIO();
+            recipes = await RecipeService.GetRecipesAsync();
+        }
+    }
+}

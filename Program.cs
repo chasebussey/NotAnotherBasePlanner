@@ -1,13 +1,19 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using NotAnotherBasePlanner.Data;
+using System.Reflection;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddDbContext<PlannerContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("default")));
+builder.Services.AddScoped<MaterialService>();
+builder.Services.AddScoped<BuildingService>();
+builder.Services.AddScoped<RecipeService>();
 
 var app = builder.Build();
 
