@@ -14,6 +14,7 @@ builder.Services.AddDbContext<PlannerContext>(opt => opt.UseSqlServer(builder.Co
 builder.Services.AddScoped<MaterialService>();
 builder.Services.AddScoped<BuildingService>();
 builder.Services.AddScoped<RecipeService>();
+builder.Services.AddScoped<PriceService>();
 
 var app = builder.Build();
 

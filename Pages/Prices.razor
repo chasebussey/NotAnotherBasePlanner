@@ -1,0 +1,56 @@
+@page "/prices"
+
+<PageTitle>Prices</PageTitle>
+
+@using NotAnotherBasePlanner.Data
+@inject PriceService PriceService
+
+<h1>Prices</h1>
+
+<p>List of all prices</p>
+
+@if (prices == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+    <thead>
+        <tr>
+            <th>Ticker</th>
+            <th>Name</th>
+            <th>MMBuy</th>
+            <th>MMSell</th>
+            <th>Price Average</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var price in prices)
+            {
+                <tr>
+                    <td>@price.MaterialTicker</td>
+                    <td>@price.ExchangeCode</td>
+                    <td>@price.MarketMakerBuy</td>
+                    <td>@price.MarketMakerSell</td>
+                    <td>@price.PriceAverage</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Price[]? prices;
+
+    protected override async Task OnInitializedAsync()
+    {
+        prices = await PriceService.GetPricesAsync();
+
+        if (prices == null || prices.Length == 0)
+        {
+            PriceService.UpdateAllPricesFromFIO();
+            prices = await PriceService.GetPricesAsync();
+        }
+    }
+}
