@@ -15,6 +15,7 @@ builder.Services.AddScoped<MaterialService>();
 builder.Services.AddScoped<BuildingService>();
 builder.Services.AddScoped<RecipeService>();
 builder.Services.AddScoped<PriceService>();
+builder.Services.AddScoped<MaterialRecipeService>();
 
 var app = builder.Build();
 
@@ -34,5 +35,4 @@ app.UseRouting();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
-
 app.Run();
