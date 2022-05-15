@@ -1,0 +1,29 @@
+@page "/building-cost"
+
+<PageTitle>Check Building Costs</PageTitle>
+
+@using NotAnotherBasePlanner.Data
+@inject MaterialService MaterialService
+@inject PriceService PriceService
+@inject BuildingService BuildingService
+
+<h1>Check Building Costs</h1>
+
+<input type="text" @bind="buildingTicker" placeholder="Building Ticker" />
+<select id="market" @bind="market">
+    <option value="NC1">NC Space</option>
+</select>
+
+@code {
+    private Building[] buildings;
+
+    private string? buildingTicker;
+    private string? market;
+
+    private double cost;
+
+    protected override async Task OnInitializedAsync()
+    {
+        buildings = await BuildingService.GetBuildingsAsync();
+    }
+}
