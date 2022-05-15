@@ -1,0 +1,110 @@
+@page "/market-maker-search"
+
+<PageTitle>Search for Market Makers</PageTitle>
+
+@using NotAnotherBasePlanner.Data
+@inject MaterialService MaterialService
+@inject PriceService PriceService
+@inject RecipeService RecipeService
+@inject BuildingService BuildingService
+@inject MaterialRecipeService MaterialRecipeService
+
+<h1>Search for Market Makers</h1>
+
+<input type="text" @bind="materialTicker" placeholder="Material Ticker (optional)" />
+<input type="text" @bind="expertiseString" placeholder="Expertise, comma separated." style="width:50%" />
+<button type="submit" @onclick="SearchPrices">Search</button>
+
+@if (mmInfo == null)
+{
+    <p>No market makers found</p>
+}
+else
+{
+    <table class="table">
+    <thead>
+        <tr>
+            <td>Material Ticker</td>
+            <td>Market Maker Buy</td>
+            <td>Recipe</td>
+            <td>Building</td>
+            <td>Expertise</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (MarketMakerInfo info in mmInfo)
+            {
+                <tr>
+                    <td>@info.MaterialTicker</td>
+                    <td>@info.MarketMakerBuy</td>
+                    <td>@info.RecipeName</td>
+                    <td>@info.BuildingTicker</td>
+                    <td>@info.Expertise</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    private Material[]? materials;
+    private Price[]? prices;
+    private Recipe[]? recipes;
+    private Building[]? buildings;
+    private MaterialRecipe[]? materialRecipes;
+
+    private string? materialTicker;
+    private string? expertiseString;
+
+    private MarketMakerInfo[]? mmInfo;
+
+    protected override async Task OnInitializedAsync()
+    {
+        materials = await MaterialService.GetMaterialsAsync();
+        prices = await PriceService.GetPricesAsync();
+        recipes = await RecipeService.GetRecipesAsync();
+        buildings = await BuildingService.GetBuildingsAsync();
+        materialRecipes = MaterialRecipeService.GetMaterialRecipes();
+    }
+    private void SearchPrices()
+    {
+        expertiseString = expertiseString.Replace(" ", "");
+        string[] expertises = string.IsNullOrEmpty(expertiseString) ? null : expertiseString.Split(',');
+
+        IEnumerable<MarketMakerInfo> query =
+        from material in materials
+        join price in prices on material.Ticker equals price.MaterialTicker
+        join materialRecipe in materialRecipes on material.Ticker equals materialRecipe.MaterialTicker
+        join recipe in recipes on materialRecipe.RecipeId equals recipe.RecipeId
+        join building in buildings on recipe.BuildingTicker equals building.Ticker
+        where price.MarketMakerBuy != null && price.ExchangeCode == "NC1"
+        select new MarketMakerInfo
+        {
+            MaterialTicker = material.Ticker,
+            MarketMakerBuy = price.MarketMakerBuy ??= 0,
+            RecipeName = recipe.RecipeName,
+            BuildingTicker = building.Ticker,
+            Expertise = building.Expertise
+        };
+
+        if (!string.IsNullOrEmpty(materialTicker))
+        {
+            query = query.Where(x => x.MaterialTicker == materialTicker);
+        }
+
+        if (expertises != null)
+        {
+            query = query.Where(x => expertises.Contains(x.Expertise, StringComparer.InvariantCultureIgnoreCase));
+        }
+
+        mmInfo = query.ToArray();
+    }
+
+    private class MarketMakerInfo
+    {
+        public string MaterialTicker { get; set; }
+        public double MarketMakerBuy { get; set; }
+        public string RecipeName { get; set; }
+        public string BuildingTicker { get; set; }
+        public string Expertise { get; set; }
+    }
+}
