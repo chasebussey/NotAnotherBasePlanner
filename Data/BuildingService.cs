@@ -39,4 +39,13 @@ public class BuildingService
     {
         return await DbContext.Buildings.ToArrayAsync();
     }
+
+    public async Task<Building> GetBuildingByTickerAsync(string ticker)
+    {
+        // safe since Ticker should be unique
+        return await DbContext.Buildings.FirstAsync(x => x.Ticker.Equals(ticker, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    // TODO: Determine if there is any need for update, create, delete
+    //       I don't think there is
 }

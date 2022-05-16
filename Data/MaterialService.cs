@@ -38,4 +38,17 @@ public class MaterialService
     {
         return await DbContext.Materials.ToArrayAsync();
     }
+
+    public async Task<Material> GetMaterialByTickerAsync(string ticker)
+    {
+        return await DbContext.Materials.FirstAsync(x => x.Ticker == ticker);
+    }
+
+    public async Task<Material[]> GetMaterialsByCategoryAsync(string category)
+    {
+        return await DbContext.Materials.Where(x =>
+            !string.IsNullOrEmpty(x.CategoryName) &&
+            x.CategoryName.Equals(category, StringComparison.InvariantCultureIgnoreCase))
+            .ToArrayAsync();
+    }
 }

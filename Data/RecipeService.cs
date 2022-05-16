@@ -37,4 +37,21 @@ public class RecipeService
     {
         return await DbContext.Recipes.ToArrayAsync();
     }
+
+    public async Task<Recipe[]> GetRecipesByOutputAsync(string outputTicker)
+    {
+        return await DbContext.Recipes.Where(x => x.Outputs.Contains(outputTicker)).ToArrayAsync();
+    }
+
+    public async Task<Recipe[]> GetRecipesByInputAsync(string inputTicker)
+    {
+        return await DbContext.Recipes.Where(x => x.Inputs.Contains(inputTicker)).ToArrayAsync();
+    }
+
+    public async Task<Recipe[]> GetRecipesByBuildingAsync(string buildingTicker)
+    {
+        return await DbContext.Recipes.Where(x =>
+            x.BuildingTicker.Equals(buildingTicker, StringComparison.InvariantCultureIgnoreCase))
+            .ToArrayAsync();
+    }
 }
