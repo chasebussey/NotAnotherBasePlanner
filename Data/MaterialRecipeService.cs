@@ -39,4 +39,14 @@ public class MaterialRecipeService
     {
         return DbContext.MaterialRecipes.ToArray();
     }
+
+    public async Task<MaterialRecipe[]> GetMaterialRecipesAsync()
+    {
+        return await DbContext.MaterialRecipes.ToArrayAsync();
+    }
+
+    public async Task<MaterialRecipe[]> GetMaterialRecipesByTicker(string materialTicker)
+    {
+        return await DbContext.MaterialRecipes.Where(x => x.MaterialTicker == materialTicker).ToArrayAsync();
+    }
 }

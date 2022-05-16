@@ -37,4 +37,23 @@ public class PriceService
     {
         return await DbContext.Prices.ToArrayAsync();
     }
+
+    public async Task<Price[]> GetPricesByTickerAsync(string materialTicker)
+    {
+        return await DbContext.Prices.Where(x =>
+            x.MaterialTicker.Equals(materialTicker, StringComparison.InvariantCultureIgnoreCase))
+            .ToArrayAsync();
+    }
+
+    public async Task<Price[]> GetMarketMakerPrices()
+    {
+        return await DbContext.Prices.Where(x => x.MarketMakerBuy != null).ToArrayAsync();
+    }
+
+    public async Task<Price[]> GetPricesByExchangeCodeAsync(string exchangeCode)
+    {
+        return await DbContext.Prices.Where(x =>
+            x.ExchangeCode.Equals(exchangeCode, StringComparison.InvariantCultureIgnoreCase))
+            .ToArrayAsync();
+    }
 }
