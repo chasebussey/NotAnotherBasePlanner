@@ -38,6 +38,11 @@ public class RecipeService
         return await DbContext.Recipes.ToArrayAsync();
     }
 
+    public Recipe[] GetRecipes()
+    {
+        return DbContext.Recipes.ToArray();
+    }
+
     public async Task<Recipe[]> GetRecipesByOutputAsync(string outputTicker)
     {
         return await DbContext.Recipes.Where(x => x.Outputs.Contains(outputTicker)).ToArrayAsync();
