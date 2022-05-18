@@ -1,0 +1,15 @@
+.collapsible-panel {
+    border: 1px solid #eee;
+    padding: 25px;
+    background-color: white;
+    overflow: hidden;
+}
+ 
+.collapsible .title {
+    display: table-cell
+}
+ 
+.collapsible .value {
+    display: table-cell;
+    text-align: right;
+}
