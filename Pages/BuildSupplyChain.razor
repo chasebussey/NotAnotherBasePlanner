@@ -3,6 +3,7 @@
 <PageTitle>Generate supply chain</PageTitle>
 
 @using NotAnotherBasePlanner.Data
+@inject ILogger<BuildSupplyChain> logger
 @inject MaterialService MaterialService
 @inject PriceService PriceService
 @inject RecipeService RecipeService
@@ -56,6 +57,7 @@
 
     private void GetBaseRecipe()
     {
+        logger.LogWarning("Entering search method");
         Recipe[] recipes = this.recipes.Where(x => x.Outputs.Contains(materialTicker)).ToArray();
 
         recipeNode = new RecipeNode(recipes[0]);
@@ -64,6 +66,7 @@
 
     private void AddChildRecipes(RecipeNode node)
     {
+        logger.LogWarning($"Getting children for: {node.Recipe.RecipeName}");
         if (node is null)
         {
             return;
@@ -82,11 +85,12 @@
 
             node.AddChild(tempRecipe);
 
-            foreach (RecipeNode child in node.Children)
-            {
-                AddChildRecipes(child);
-            }
             //AddChildRecipes(node.GetChild(0));
+        }
+
+        foreach (RecipeNode child in node.Children)
+        {
+            AddChildRecipes(child);
         }
     }
 }
