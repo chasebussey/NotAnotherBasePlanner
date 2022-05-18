@@ -64,12 +64,15 @@ else
         recipes = await RecipeService.GetRecipesAsync();
         buildings = await BuildingService.GetBuildingsAsync();
         materialRecipes = MaterialRecipeService.GetMaterialRecipes();
+
+        if (materialRecipes == null || materialRecipes.Length == 0)
+        {
+            MaterialRecipeService.UpdateAllMaterialRecipes();
+            materialRecipes = MaterialRecipeService.GetMaterialRecipes();
+        }
     }
     private void SearchPrices()
     {
-        expertiseString = expertiseString.Replace(" ", "");
-        string[] expertises = string.IsNullOrEmpty(expertiseString) ? null : expertiseString.Split(',');
-
         IEnumerable<MarketMakerInfo> query =
         from material in materials
         join price in prices on material.Ticker equals price.MaterialTicker
@@ -91,8 +94,11 @@ else
             query = query.Where(x => x.MaterialTicker == materialTicker);
         }
 
-        if (expertises != null)
+        if (!string.IsNullOrEmpty(expertiseString))
         {
+            expertiseString = expertiseString.Replace(" ", "");
+            string[] expertises = string.IsNullOrEmpty(expertiseString) ? null : expertiseString.Split(',');
+
             query = query.Where(x => expertises.Contains(x.Expertise, StringComparer.InvariantCultureIgnoreCase));
         }
 
