@@ -15,7 +15,10 @@ if (builder.Environment.IsProduction())
         new DefaultAzureCredential()
     );
 }
-builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
+else
+{
+    builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
+}
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
@@ -45,4 +48,11 @@ app.UseRouting();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
+
+using (var scope = app.Services.CreateScope())
+{
+    var dataContext = scope.ServiceProvider.GetRequiredService<PlannerContext>();
+    dataContext.Database.Migrate();
+}
+
 app.Run();
