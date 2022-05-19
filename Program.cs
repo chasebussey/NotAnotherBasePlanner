@@ -3,9 +3,22 @@ using Microsoft.AspNetCore.Components.Web;
 using NotAnotherBasePlanner.Data;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
+
+if (builder.Environment.IsProduction())
+{
+    builder.Configuration.AddAzureKeyVault(
+        new Uri($"https://{builder.Configuration["KeyVaultName"]}.vault.azure.net/"),
+        new DefaultAzureCredential()
+    );
+}
+else
+{
+    builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
+}
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
@@ -35,4 +48,14 @@ app.UseRouting();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
+
+using (var scope = app.Services.CreateScope())
+{
+    var dataContext = scope.ServiceProvider.GetRequiredService<PlannerContext>();
+    dataContext.Database.Migrate();
+
+    var priceService = scope.ServiceProvider.GetRequiredService<PriceService>();
+    priceService.UpdateAllPricesFromFIO();
+}
+
 app.Run();
