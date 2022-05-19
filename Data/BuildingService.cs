@@ -57,4 +57,15 @@ public class BuildingService
 
     // TODO: Determine if there is any need for update, create, delete
     //       I don't think there is
+
+    // Okay, BuildingCost Methods probably don't belong here
+    public async Task<BuildingCost[]> GetBuildingCostsAsync()
+    {
+        return await DbContext.BuildingCosts.ToArrayAsync();
+    }
+
+    public BuildingCost[] GetBuildingCostsByTicker(string ticker)
+    {
+        return DbContext.BuildingCosts.Where(x => x.BuildingTicker == ticker).ToArray();
+    }
 }
