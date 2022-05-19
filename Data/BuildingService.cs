@@ -29,7 +29,16 @@ public class BuildingService
 
         foreach (Building building in buildings)
         {
-            DbContext.Buildings.Add(building);
+            if (!DbContext.Buildings.Contains(building))
+            {
+
+                DbContext.Buildings.Add(building);
+            }
+            foreach (BuildingCost buildingCost in building.BuildingCosts)
+            {
+                buildingCost.BuildingTicker = building.Ticker;
+                DbContext.BuildingCosts.Add(buildingCost);
+            }
         }
 
         DbContext.SaveChanges();

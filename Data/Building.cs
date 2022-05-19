@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
+namespace NotAnotherBasePlanner.Data;
+
 public class Building
 {
     [Key]
@@ -12,4 +14,5 @@ public class Building
     public int Engineers { get; set; }
     public int Scientists { get; set; }
     public int AreaCost { get; set; }
+    public List<BuildingCost> BuildingCosts { get; set; }
 }

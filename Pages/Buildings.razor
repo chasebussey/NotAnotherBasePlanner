@@ -1,4 +1,4 @@
-@page "/building"
+@page "/buildings"
 
 <PageTitle>Buildings</PageTitle>
 
@@ -9,6 +9,7 @@
 
 <p>List of all buildings</p>
 
+<button class="submit" @onclick="UpdateBuildings">Update Buildings</button>
 @if (buildings == null)
 {
     <p><em>Loading...</em></p>
@@ -50,5 +51,10 @@ else
             buildingService.UpdateAllBuildingsFromFIO();
             buildings = await buildingService.GetBuildingsAsync();
         }
+    }
+
+    private void UpdateBuildings()
+    {
+        buildingService.UpdateAllBuildingsFromFIO();
     }
 }
