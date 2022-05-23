@@ -44,6 +44,11 @@ public class MaterialService
         return await DbContext.Materials.FirstAsync(x => x.Ticker == ticker);
     }
 
+    public Material GetMaterialByTicker(string ticker)
+    {
+        return DbContext.Materials.First(x => x.Ticker == ticker);
+    }
+
     public async Task<Material[]> GetMaterialsByCategoryAsync(string category)
     {
         return await DbContext.Materials.Where(x =>

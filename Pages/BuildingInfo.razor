@@ -6,14 +6,18 @@
 @inject MaterialService MaterialService
 @inject PriceService PriceService
 @inject BuildingService BuildingService
+@inject ILogger<BuildingInfo> logger
 
 <h1>Get Building Information</h1>
 
-<input type="text" @bind="buildingSearchString" placeholder="Building Ticker" />
-<select id="market" @bind="market">
-    <option value="NC1">NC Space</option>
-</select>
-<button type="submit" @onclick="Search">Search</button>
+<form @onsubmit="Search">
+    <input type="text" @bind="buildingSearchString" placeholder="Building Ticker" />
+    <select id="market" @bind="market">
+        <option value="NC1">NC Space</option>
+    </select>
+    <button type="submit">Search</button>
+    <button @onclick="Clear">Clear</button>
+</form>
 <br /><br />
 
 @if (buildingCosts != null)
@@ -58,7 +62,7 @@
         </div>
         <br />
         <br />
-        @foreach (Building building in buildings)
+        @foreach (Building building in searchBuildings)
         {
             <hr style="width:100%" />
             <div>
@@ -114,14 +118,14 @@
 
 @code {
     private Building[] buildings;
-    private Data.BuildingCost[] buildingCosts;
+    private List<Building> searchBuildings;
+    private List<BuildingCost> buildingCosts;
     private Price[] prices;
 
     private string? buildingSearchString;
     private string[] buildingTickers;
     private string? market;
 
-    // TODO: Clean this up?
     private double totalCost;
     private int totalAreaCost;
     private int totalPio;
@@ -138,46 +142,97 @@
 
     private void Search()
     {
-        totalCost = 0.0;
+        if (string.IsNullOrEmpty(buildingSearchString))
+        {
+            return;
+        }
+
+        searchBuildings = new List<Building>();
+        buildingCosts = new List<BuildingCost>();
+        ClearTotals();
+
         buildingSearchString = buildingSearchString.Replace(" ", "").ToUpper();
-        if (buildingTickers is null)
+        buildingTickers = buildingSearchString.Split(",");
+
+        foreach (string ticker in buildingTickers)
         {
-            buildingTickers = buildingSearchString.Split(",");
-        }
-        else
-        {
-            buildingTickers = buildingTickers.Concat(buildingSearchString.Split(",")).ToArray();
+            searchBuildings.Add(buildings.Where(x => x.Ticker.Equals(ticker, StringComparison.InvariantCultureIgnoreCase)).First());
         }
 
-        buildings = buildings.Where(x => buildingTickers.Contains(x.Ticker,
-        StringComparer.InvariantCultureIgnoreCase)).ToArray();
-
-        foreach (Building building in buildings)
+        foreach (Building building in searchBuildings)
         {
             totalAreaCost += building.AreaCost;
             totalPio += building.Pioneers;
             totalSet += building.Settlers;
-            totalSet += building.Technicians;
+            totalTech += building.Technicians;
             totalEng += building.Engineers;
             totalSci += building.Scientists;
 
-            BuildingCost[] tempBuildingCosts = BuildingService.GetBuildingCostsByTicker(building.Ticker).ToArray();
+            // WHY IS THIS MODIFYING tempBuildingCosts
+            List<BuildingCost> tempBuildingCosts = BuildingService.GetBuildingCostsByTicker(building.Ticker).ToList();
             if (buildingCosts is null)
             {
                 buildingCosts = tempBuildingCosts;
             }
             else
             {
-                buildingCosts = buildingCosts.Concat(tempBuildingCosts).ToArray();
-            }
-            building.BuildingCosts = tempBuildingCosts.ToList();
-            foreach (Data.BuildingCost buildingCost in tempBuildingCosts)
-            {
-                double matPrice = prices.Where(p => p.MaterialTicker == buildingCost.MaterialTicker).Select(p => p.PriceAverage).First()
-                ?? 0.0;
-
-                totalCost += (matPrice * buildingCost.Amount);
+                buildingCosts = buildingCosts.Concat(tempBuildingCosts).ToList();
             }
         }
+
+        foreach (BuildingCost buildingCost in buildingCosts)
+        {
+            double matPrice = prices.Where(p => p.MaterialTicker == buildingCost.MaterialTicker).Select(p => p.PriceAverage).First()
+            ?? 0.0;
+
+            totalCost += (matPrice * buildingCost.Amount);
+        }
+
+        CoalesceBuildingCosts();
+    }
+
+    private void Clear()
+    {
+        ClearTotals();
+        buildingSearchString = "";
+        buildingTickers = null;
+        buildingCosts = null;
+    }
+
+    private void ClearTotals()
+    {
+        totalCost = 0.0;
+        totalAreaCost = 0;
+        totalPio = 0;
+        totalSet = 0;
+        totalEng = 0;
+        totalTech = 0;
+        totalSci = 0;
+    }
+
+    private void CoalesceBuildingCosts()
+    {
+        foreach (BuildingCost bc in buildingCosts)
+        {
+            // see if this loads the Materials
+            MaterialService.GetMaterialByTicker(bc.MaterialTicker);
+        }
+
+        List<Material> materials = buildingCosts.Select(x => x.Material).Distinct().ToList();
+        List<BuildingCost> outputBuildingCosts = new List<BuildingCost>();
+
+        foreach (Material material in materials)
+        {
+            IEnumerable<BuildingCost> tempBuildingCosts = buildingCosts.Where(x => x.Material.Equals(material));
+
+            outputBuildingCosts.Add(
+            new BuildingCost
+            {
+                MaterialTicker = material.Ticker,
+                Amount = tempBuildingCosts.Sum(x => x.Amount)
+            });
+        }
+
+        buildingCosts = outputBuildingCosts;
     }
 }
