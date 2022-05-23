@@ -12,6 +12,7 @@ public class PlannerContext : DbContext
     public DbSet<Recipe> Recipes { get; set; }
     public DbSet<Price> Prices { get; set; }
     public DbSet<MaterialRecipe> MaterialRecipes { get; set; }
+    public DbSet<BuildingCost> BuildingCosts { get; set; }
 
     public PlannerContext(DbContextOptions<PlannerContext> options) : base(options) { }
 
@@ -39,6 +40,9 @@ public class PlannerContext : DbContext
 
         modelBuilder.Entity<MaterialRecipe>()
             .HasKey(e => new { e.MaterialTicker, e.RecipeId });
+
+        modelBuilder.Entity<BuildingCost>()
+            .HasKey(e => new { e.BuildingTicker, e.MaterialTicker });
 
         foreach (IMutableEntityType entityType in modelBuilder.Model.GetEntityTypes())
         {

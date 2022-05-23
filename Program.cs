@@ -53,9 +53,6 @@ using (var scope = app.Services.CreateScope())
 {
     var dataContext = scope.ServiceProvider.GetRequiredService<PlannerContext>();
     dataContext.Database.Migrate();
-
-    var priceService = scope.ServiceProvider.GetRequiredService<PriceService>();
-    priceService.UpdateAllPricesFromFIO();
 }
 
 app.Run();

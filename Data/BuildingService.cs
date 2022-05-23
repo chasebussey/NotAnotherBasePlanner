@@ -29,7 +29,16 @@ public class BuildingService
 
         foreach (Building building in buildings)
         {
-            DbContext.Buildings.Add(building);
+            if (!DbContext.Buildings.Contains(building))
+            {
+
+                DbContext.Buildings.Add(building);
+            }
+            foreach (BuildingCost buildingCost in building.BuildingCosts)
+            {
+                buildingCost.BuildingTicker = building.Ticker;
+                DbContext.BuildingCosts.Add(buildingCost);
+            }
         }
 
         DbContext.SaveChanges();
@@ -48,4 +57,15 @@ public class BuildingService
 
     // TODO: Determine if there is any need for update, create, delete
     //       I don't think there is
+
+    // Okay, BuildingCost Methods probably don't belong here
+    public async Task<BuildingCost[]> GetBuildingCostsAsync()
+    {
+        return await DbContext.BuildingCosts.ToArrayAsync();
+    }
+
+    public BuildingCost[] GetBuildingCostsByTicker(string ticker)
+    {
+        return DbContext.BuildingCosts.Where(x => x.BuildingTicker == ticker).ToArray();
+    }
 }

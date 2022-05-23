@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NotAnotherBasePlanner.Data;
 
@@ -11,9 +12,10 @@ using NotAnotherBasePlanner.Data;
 namespace NotAnotherBasePlanner.Migrations
 {
     [DbContext(typeof(PlannerContext))]
-    partial class PlannerContextModelSnapshot : ModelSnapshot
+    [Migration("20220519023734_CreateBuildingCostTable")]
+    partial class CreateBuildingCostTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -54,7 +56,7 @@ namespace NotAnotherBasePlanner.Migrations
 
                     b.HasKey("Ticker");
 
-                    b.ToTable("Building", (string)null);
+                    b.ToTable("Building");
                 });
 
             modelBuilder.Entity("NotAnotherBasePlanner.Data.BuildingCost", b =>
@@ -72,7 +74,7 @@ namespace NotAnotherBasePlanner.Migrations
 
                     b.HasIndex("MaterialTicker");
 
-                    b.ToTable("BuildingCost", (string)null);
+                    b.ToTable("BuildingCost");
                 });
 
             modelBuilder.Entity("NotAnotherBasePlanner.Data.Material", b =>
@@ -95,7 +97,7 @@ namespace NotAnotherBasePlanner.Migrations
 
                     b.HasKey("Ticker");
 
-                    b.ToTable("Material", (string)null);
+                    b.ToTable("Material");
                 });
 
             modelBuilder.Entity("NotAnotherBasePlanner.Data.MaterialRecipe", b =>
@@ -110,7 +112,7 @@ namespace NotAnotherBasePlanner.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.ToTable("MaterialRecipe", (string)null);
+                    b.ToTable("MaterialRecipe");
                 });
 
             modelBuilder.Entity("NotAnotherBasePlanner.Data.Price", b =>
@@ -147,7 +149,7 @@ namespace NotAnotherBasePlanner.Migrations
 
                     b.HasKey("MaterialTicker", "ExchangeCode");
 
-                    b.ToTable("Price", (string)null);
+                    b.ToTable("Price");
                 });
 
             modelBuilder.Entity("NotAnotherBasePlanner.Data.Recipe", b =>
@@ -181,7 +183,7 @@ namespace NotAnotherBasePlanner.Migrations
 
                     b.HasIndex("BuildingTicker");
 
-                    b.ToTable("Recipe", (string)null);
+                    b.ToTable("Recipe");
                 });
 
             modelBuilder.Entity("NotAnotherBasePlanner.Data.BuildingCost", b =>
