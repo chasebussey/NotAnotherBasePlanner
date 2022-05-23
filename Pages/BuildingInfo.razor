@@ -156,8 +156,12 @@
 
     private void Search()
     {
+        // TODO: Add a warning to the user
         if (string.IsNullOrEmpty(buildingSearchString))
         {
+            return;
+        }
+        if (string.IsNullOrEmpty(market)) {
             return;
         }
 
