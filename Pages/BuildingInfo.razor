@@ -13,7 +13,13 @@
 <form @onsubmit="Search">
     <input type="text" @bind="buildingSearchString" placeholder="Building Ticker" />
     <select id="market" @bind="market">
-        <option value="NC1">NC Space</option>
+        <option value="" selected disabled hidden>Nearest CX</option>
+        <option value="NC1">NC1</option>
+        <option value="NC2">NC2</option>
+        <option value="AI1">AI1</option>
+        <option value="CI1">CI1</option>
+        <option value="CI2">CI2</option>
+        <option value="IC1">IC1</option>
     </select>
     <button type="submit">Search</button>
     <button @onclick="Clear">Clear</button>
@@ -50,7 +56,8 @@
                     <td><b>Avg. Price:</b></td>
                     @foreach (BuildingCost buildingCost in buildingCosts)
                     {
-                        <td>@(prices.Where(x => x.MaterialTicker == buildingCost.MaterialTicker).Select(
+                        <td>@(prices.Where(x => x.MaterialTicker == buildingCost.MaterialTicker && x.ExchangeCode ==
+                    market).Select(
                     x => x.PriceAverage).First() ?? 0.00)
                         </td>
                     }
@@ -64,6 +71,7 @@
         <br />
         @foreach (Building building in searchBuildings)
         {
+            double buildingTotal = 0.0;
             <hr style="width:100%" />
             <div>
         <h5>Contruction Costs: @building.Ticker</h5>
@@ -89,14 +97,20 @@
                             <td><b>Avg. Price:</b></td>
                             @foreach (BuildingCost buildingCost in building.BuildingCosts)
                             {
-                                <td>@(prices.Where(x => x.MaterialTicker == buildingCost.MaterialTicker).Select(
-                        x => x.PriceAverage).First() ?? 0.00)
-                                </td>
+                                double price =(prices.Where(x => x.MaterialTicker == buildingCost.MaterialTicker && x.ExchangeCode ==
+                        market).Select(
+                        x => x.PriceAverage).First() ?? 0.00);
+                                <td>@price</td>
+                                buildingTotal += price * buildingCost.Amount;
                             }
                         </tr>
                     </tbody>
                 </table>
             </div>
+            <div style="float:right">
+        <b>Total:</b> @buildingTotal
+    </div>
+            <br />
             <br />
         }
     </div>
@@ -156,7 +170,8 @@
 
         foreach (string ticker in buildingTickers)
         {
-            searchBuildings.Add(buildings.Where(x => x.Ticker.Equals(ticker, StringComparison.InvariantCultureIgnoreCase)).First());
+            searchBuildings.Add(buildings.Where(x => x.Ticker.Equals(ticker,
+            StringComparison.InvariantCultureIgnoreCase)).First());
         }
 
         foreach (Building building in searchBuildings)
@@ -169,7 +184,8 @@
             totalSci += building.Scientists;
 
             // WHY IS THIS MODIFYING tempBuildingCosts
-            List<BuildingCost> tempBuildingCosts = BuildingService.GetBuildingCostsByTicker(building.Ticker).ToList();
+            List<BuildingCost> tempBuildingCosts =
+            BuildingService.GetBuildingCostsByTicker(building.Ticker).ToList();
             if (buildingCosts is null)
             {
                 buildingCosts = tempBuildingCosts;
@@ -182,7 +198,9 @@
 
         foreach (BuildingCost buildingCost in buildingCosts)
         {
-            double matPrice = prices.Where(p => p.MaterialTicker == buildingCost.MaterialTicker).Select(p => p.PriceAverage).First()
+            double matPrice = prices.Where(p => p.MaterialTicker == buildingCost.MaterialTicker && p.ExchangeCode ==
+            market).Select(p =>
+            p.PriceAverage).First()
             ?? 0.0;
 
             totalCost += (matPrice * buildingCost.Amount);
