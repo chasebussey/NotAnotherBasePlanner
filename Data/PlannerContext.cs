@@ -2,10 +2,11 @@ using System.Collections.Generic;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace NotAnotherBasePlanner.Data;
 
-public class PlannerContext : DbContext
+public class PlannerContext : IdentityDbContext
 {
     public DbSet<Material> Materials { get; set; }
     public DbSet<Building> Buildings { get; set; }

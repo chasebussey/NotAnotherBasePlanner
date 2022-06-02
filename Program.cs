@@ -5,6 +5,7 @@ using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,9 @@ builder.Services.AddScoped<BuildingService>();
 builder.Services.AddScoped<RecipeService>();
 builder.Services.AddScoped<PriceService>();
 builder.Services.AddScoped<MaterialRecipeService>();
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<PlannerContext>(); ;
+
 
 var app = builder.Build();
 
@@ -54,5 +58,7 @@ using (var scope = app.Services.CreateScope())
     var dataContext = scope.ServiceProvider.GetRequiredService<PlannerContext>();
     dataContext.Database.Migrate();
 }
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.Run();
