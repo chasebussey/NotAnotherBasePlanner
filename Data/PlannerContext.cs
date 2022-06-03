@@ -21,6 +21,11 @@ public class PlannerContext : IdentityDbContext<ApplicationUser>
     {
         base.OnModelCreating(modelBuilder);
 
+        // remove some of the fields we don't need on the user
+        modelBuilder.Entity<ApplicationUser>()
+            .Ignore(x => x.PhoneNumber)
+            .Ignore(x => x.PhoneNumberConfirmed);
+
         modelBuilder.Entity<Recipe>()
             .Property(e => e.Inputs)
             .HasConversion(
