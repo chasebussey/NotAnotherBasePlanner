@@ -4,6 +4,7 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,8 +14,10 @@
     <link href="NotAnotherBasePlanner.styles.css" rel="stylesheet" />
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
 </head>
+
 <body>
     @RenderBody()
+    @RenderSection("Scripts", required: false)
 
     <div id="blazor-error-ui">
         <environment include="Staging,Production">
@@ -29,4 +32,8 @@
 
     <script src="_framework/blazor.server.js"></script>
 </body>
+
 </html>
+
+@section Scripts{
+}

@@ -2,10 +2,11 @@ using System.Collections.Generic;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace NotAnotherBasePlanner.Data;
 
-public class PlannerContext : DbContext
+public class PlannerContext : IdentityDbContext<ApplicationUser>
 {
     public DbSet<Material> Materials { get; set; }
     public DbSet<Building> Buildings { get; set; }
@@ -18,6 +19,13 @@ public class PlannerContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
+        // remove some of the fields we don't need on the user
+        modelBuilder.Entity<ApplicationUser>()
+            .Ignore(x => x.PhoneNumber)
+            .Ignore(x => x.PhoneNumberConfirmed);
+
         modelBuilder.Entity<Recipe>()
             .Property(e => e.Inputs)
             .HasConversion(
