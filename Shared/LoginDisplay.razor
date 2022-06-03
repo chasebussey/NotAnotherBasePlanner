@@ -4,16 +4,12 @@
 
 <AuthorizeView>
     <Authorized>
-        <a href="Identity/Account/Manage/Index">
-            Hello, @context.User.Identity.Name!
-        </a>
-        <form action="/Identity/Account/Logout?returnUrl=%2F" method="post">
+        <form action="/Identity/Account/Logout?returnUrl=%2F" method="post" class="form-inline" style="margin:0">
             <button class="nav-link btn btn-link" type="submit">Logout</button>
             <input name="__RequestVerificationToken" type="hidden" value="@TokenProvider.XsrfToken">
         </form>
     </Authorized>
     <NotAuthorized>
-        <a href="Identity/Account/Register">Register</a>
-        <a href="Identity/Account/Login">Login</a>
+        <NavLink href="Identity/Account/Login" class="nav-link">Login</NavLink>
     </NotAuthorized>
 </AuthorizeView>
