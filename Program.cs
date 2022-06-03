@@ -39,6 +39,9 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
     options.Password.RequireNonAlphanumeric = false;
 }).AddEntityFrameworkStores<PlannerContext>(); ;
 
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<TokenProvider>();
+
 
 var app = builder.Build();
 
