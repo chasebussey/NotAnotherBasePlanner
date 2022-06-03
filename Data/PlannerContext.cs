@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace NotAnotherBasePlanner.Data;
 
-public class PlannerContext : IdentityDbContext
+public class PlannerContext : IdentityDbContext<ApplicationUser>
 {
     public DbSet<Material> Materials { get; set; }
     public DbSet<Building> Buildings { get; set; }
@@ -19,6 +19,8 @@ public class PlannerContext : IdentityDbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<Recipe>()
             .Property(e => e.Inputs)
             .HasConversion(

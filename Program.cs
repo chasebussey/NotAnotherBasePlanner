@@ -30,8 +30,14 @@ builder.Services.AddScoped<BuildingService>();
 builder.Services.AddScoped<RecipeService>();
 builder.Services.AddScoped<PriceService>();
 builder.Services.AddScoped<MaterialRecipeService>();
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<PlannerContext>(); ;
+builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = true;
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+}).AddEntityFrameworkStores<PlannerContext>(); ;
 
 
 var app = builder.Build();
@@ -58,6 +64,7 @@ using (var scope = app.Services.CreateScope())
     var dataContext = scope.ServiceProvider.GetRequiredService<PlannerContext>();
     dataContext.Database.Migrate();
 }
+
 app.UseAuthentication();
 app.UseAuthorization();
 
