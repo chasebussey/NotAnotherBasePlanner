@@ -14,6 +14,10 @@ public class PlannerContext : IdentityDbContext<ApplicationUser>
     public DbSet<Price> Prices { get; set; }
     public DbSet<MaterialRecipe> MaterialRecipes { get; set; }
     public DbSet<BuildingCost> BuildingCosts { get; set; }
+    public DbSet<Corporation> Corporations { get; set; }
+    public DbSet<CorporateProject> CorporateProjects { get; set; }
+    public DbSet<CorporateProjectItem> ProjectItems { get; set; }
+    public DbSet<CorporateProjectUser> ProjectUsers { get; set; }
 
     public PlannerContext(DbContextOptions<PlannerContext> options) : base(options) { }
 
@@ -51,6 +55,9 @@ public class PlannerContext : IdentityDbContext<ApplicationUser>
 
         modelBuilder.Entity<BuildingCost>()
             .HasKey(e => new { e.BuildingTicker, e.MaterialTicker });
+
+        modelBuilder.Entity<CorporateProjectUser>()
+            .HasKey(e => new { e.UserId, e.CorporateProjectId });
 
         foreach (IMutableEntityType entityType in modelBuilder.Model.GetEntityTypes())
         {
