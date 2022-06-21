@@ -1,5 +1,6 @@
 ﻿@page "/"
-
+@using NotAnotherBasePlanner.Data;
+@inject PlanetService PlanetService
 <PageTitle>NABP</PageTitle>
 
 <h1>Not Another Base Planner</h1>
@@ -12,3 +13,11 @@
     development, consider reaching out in-game to schedule a PE purchase.</p>
 
 If you're a GTU member, you get to make feature requests on the Discord!
+
+@code {
+    protected override void OnInitialized()
+    {
+        PlanetService.UpdateAllPlanetsFromFIO();
+        base.OnInitialized();
+    }
+}

@@ -30,6 +30,7 @@ builder.Services.AddScoped<BuildingService>();
 builder.Services.AddScoped<RecipeService>();
 builder.Services.AddScoped<PriceService>();
 builder.Services.AddScoped<MaterialRecipeService>();
+builder.Services.AddScoped<PlanetService>();
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;

@@ -14,6 +14,11 @@ public class PlannerContext : IdentityDbContext<ApplicationUser>
     public DbSet<Price> Prices { get; set; }
     public DbSet<MaterialRecipe> MaterialRecipes { get; set; }
     public DbSet<BuildingCost> BuildingCosts { get; set; }
+    public DbSet<Base> Bases { get; set; }
+    public DbSet<BaseBuilding> BaseBuildings { get; set; }
+    public DbSet<Planet> Planets { get; set; }
+    public DbSet<Resource> Resources { get; set; }
+    public DbSet<UserPrice> UserPrices { get; set; }
 
     public PlannerContext(DbContextOptions<PlannerContext> options) : base(options) { }
 
