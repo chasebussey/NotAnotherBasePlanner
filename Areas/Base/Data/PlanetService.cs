@@ -6,9 +6,16 @@ namespace NotAnotherBasePlanner.Data;
 public class PlanetService
 {
     private PlannerContext DbContext { get; set; }
+    private MaterialService MaterialService { get; set; }
     public PlanetService(PlannerContext dbContext)
     {
         this.DbContext = dbContext;
+    }
+
+    public PlanetService(PlannerContext dbContext, MaterialService materialService)
+    {
+        this.DbContext = dbContext;
+        this.MaterialService = materialService;
     }
 
     public async void UpdateAllPlanetsFromFIO()
@@ -27,11 +34,16 @@ public class PlanetService
 
         foreach (Planet planet in planets)
         {
-            if (!DbContext.Planets.Contains(planet))
+            foreach (Resource resource in planet.Resources)
             {
-
+                resource.Material = MaterialService.GetMaterialByFIOId(resource.FIOId);
+                resource.MaterialTicker = resource.Material.Ticker;
+            }
+            if (!DbContext.Planets.Select(p => p.Designation).ToList().Contains(planet.Designation))
+            {
                 DbContext.Planets.Add(planet);
             }
+            // TODO: We'll need an update eventually, but likely not till the universe resets
         }
 
         DbContext.SaveChanges();

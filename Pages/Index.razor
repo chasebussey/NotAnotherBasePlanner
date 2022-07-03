@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using NotAnotherBasePlanner.Data;
+@inject MaterialService MaterialService
 @inject PlanetService PlanetService
 <PageTitle>NABP</PageTitle>
 
@@ -17,6 +18,7 @@ If you're a GTU member, you get to make feature requests on the Discord!
 @code {
     protected override void OnInitialized()
     {
+        MaterialService.UpdateAllMaterialsFromFIO();
         PlanetService.UpdateAllPlanetsFromFIO();
         base.OnInitialized();
     }

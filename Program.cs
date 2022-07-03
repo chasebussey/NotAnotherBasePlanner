@@ -30,7 +30,12 @@ builder.Services.AddScoped<BuildingService>();
 builder.Services.AddScoped<RecipeService>();
 builder.Services.AddScoped<PriceService>();
 builder.Services.AddScoped<MaterialRecipeService>();
-builder.Services.AddScoped<PlanetService>();
+builder.Services.AddScoped<PlanetService>(ps =>
+{
+    MaterialService materialService = ps.GetService<MaterialService>();
+    PlannerContext plannerContext = ps.GetService<PlannerContext>();
+    return new PlanetService(plannerContext, materialService);
+});
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;

@@ -9,20 +9,27 @@ namespace NotAnotherBasePlanner.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<string>(
+                name: "FIOId",
+                table: "Material",
+                type: "nvarchar(max)",
+                nullable: false,
+                defaultValue: "");
+
             migrationBuilder.CreateTable(
                 name: "Planet",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Designation = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DisplayName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Surface = table.Column<bool>(type: "bit", nullable: false),
                     Gravity = table.Column<double>(type: "float", nullable: false),
                     Pressure = table.Column<double>(type: "float", nullable: false),
-                    Temp = table.Column<double>(type: "float", nullable: false),
+                    Temperature = table.Column<double>(type: "float", nullable: false),
                     Fertility = table.Column<double>(type: "float", nullable: false),
-                    FactionCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    NearestCXCode = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    FactionCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NearestCXCode = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -101,6 +108,7 @@ namespace NotAnotherBasePlanner.Migrations
                     MaterialTicker = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Concentration = table.Column<double>(type: "float", nullable: false),
                     Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FIOId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PlanetId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
@@ -214,6 +222,10 @@ namespace NotAnotherBasePlanner.Migrations
 
             migrationBuilder.DropTable(
                 name: "Planet");
+
+            migrationBuilder.DropColumn(
+                name: "FIOId",
+                table: "Material");
         }
     }
 }

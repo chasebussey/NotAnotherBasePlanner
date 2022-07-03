@@ -28,7 +28,19 @@ public class MaterialService
 
         foreach (Material material in materials)
         {
-            DbContext.Materials.Add(material);
+            if (DbContext.Materials.Contains(material))
+            {
+                Material curr = DbContext.Materials.Where(x => x.Ticker == material.Ticker).First();
+                curr.CategoryName = material.CategoryName;
+                curr.FIOId = material.FIOId;
+                curr.Name = material.Name;
+                curr.Volume = material.Volume;
+                curr.Weight = material.Weight;
+            }
+            else
+            {
+                DbContext.Materials.Add(material);
+            }
         }
 
         DbContext.SaveChanges();
@@ -47,6 +59,16 @@ public class MaterialService
     public Material GetMaterialByTicker(string ticker)
     {
         return DbContext.Materials.First(x => x.Ticker == ticker);
+    }
+
+    public async Task<Material> GetMaterialByFIOIdAsync(string FIOId)
+    {
+        return await DbContext.Materials.FirstAsync(x => x.FIOId == FIOId);
+    }
+
+    public Material GetMaterialByFIOId(string FIOId)
+    {
+        return DbContext.Materials.First(x => x.FIOId == FIOId);
     }
 
     public async Task<Material[]> GetMaterialsByCategoryAsync(string category)

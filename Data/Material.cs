@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace NotAnotherBasePlanner.Data;
 
@@ -12,6 +13,8 @@ public class Material
     public string Ticker { get; set; }
     public double Weight { get; set; }
     public double Volume { get; set; }
+    [JsonPropertyName("MaterialId")]
+    public string FIOId { get; set; }
 
     public Material(string categoryName, string name, string ticker, double weight, double volume)
     {

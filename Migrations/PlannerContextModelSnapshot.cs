@@ -375,6 +375,10 @@ namespace NotAnotherBasePlanner.Migrations
                     b.Property<string>("CategoryName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("FIOId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -416,11 +420,9 @@ namespace NotAnotherBasePlanner.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DisplayName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FactionCode")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("Fertility")
@@ -430,7 +432,6 @@ namespace NotAnotherBasePlanner.Migrations
                         .HasColumnType("float");
 
                     b.Property<string>("NearestCXCode")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("Pressure")
@@ -439,7 +440,7 @@ namespace NotAnotherBasePlanner.Migrations
                     b.Property<bool>("Surface")
                         .HasColumnType("bit");
 
-                    b.Property<double>("Temp")
+                    b.Property<double>("Temperature")
                         .HasColumnType("float");
 
                     b.HasKey("Id");
@@ -526,6 +527,10 @@ namespace NotAnotherBasePlanner.Migrations
 
                     b.Property<double>("Concentration")
                         .HasColumnType("float");
+
+                    b.Property<string>("FIOId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MaterialTicker")
                         .IsRequired()
