@@ -48,4 +48,38 @@ public class PlanetService
 
         DbContext.SaveChanges();
     }
+
+    public async Task<Planet> GetPlanetByDesignationOrDisplayName(string searchString)
+    {
+        return await DbContext.Planets.FirstOrDefaultAsync(x =>
+            x.Designation.Equals(searchString, StringComparison.InvariantCultureIgnoreCase) ||
+            (x.DisplayName != null && x.DisplayName.Equals(searchString, StringComparison.InvariantCultureIgnoreCase)));
+    }
+
+    public async Task<Planet[]> GetPlanetsByFactionCode(string factionCode)
+    {
+        return await DbContext.Planets.Where(x =>
+            x.FactionCode != null && x.FactionCode.Equals(factionCode, StringComparison.InvariantCultureIgnoreCase))
+            .ToArrayAsync();
+    }
+
+    public async Task<Planet[]> GetPlanetsLikeDesignationOrDisplayNameAsync(string searchString)
+    {
+        return await DbContext.Planets.Where(x =>
+            x.Designation.Contains(searchString) ||
+            (x.DisplayName != null && x.DisplayName.Contains(searchString))).ToArrayAsync();
+    }
+
+    public Planet[] GetPlanetsLikeDesignationOrDisplayName(string searchString)
+    {
+        return DbContext.Planets.Where(x =>
+            x.Designation.Contains(searchString) ||
+            (x.DisplayName != null && x.DisplayName.Contains(searchString))).ToArray();
+    }
+
+    public Planet LoadPlanetResources(Planet planet)
+    {
+        DbContext.Entry(planet).Collection(x => x.Resources).Load();
+        return planet;
+    }
 }

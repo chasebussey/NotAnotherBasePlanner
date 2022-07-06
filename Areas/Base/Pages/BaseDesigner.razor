@@ -1,0 +1,87 @@
+@using NotAnotherBasePlanner.Data
+@using Microsoft.CodeAnalysis.CSharp.Syntax
+@inject PlanetService _planetService
+<h3>New Base: @PlanetFullDesignation</h3>
+
+<div style="display: flex">
+    <div class="" style="border: thin solid #2c3034;float: left">
+        <h5>Planet Info:</h5>
+        Surface: @PlanetSurface<br/>
+        Gravity: @PlanetGravity<br/>
+        Temperature: @PlanetTemperature<br/>
+        Pressure: @PlanetPressure
+        <hr/>
+        @foreach (Resource res in planet.Resources)
+        {
+            <text>@res.MaterialTicker | @res.Type | @res.Concentration.ToString("F2")</text><br/>
+        }
+    </div>
+
+    <div class="" style="border: thin solid #2c3034;flex-grow: 4">
+        <h5>Buildings:</h5>
+        
+        @if (basePlan.Buildings != null && basePlan.Buildings.Count > 0)
+        {
+            <table>
+                <tr>
+                    <th>Ticker</th>
+                    <th>Recipe</th>
+                    <th>Constructed?</th>
+                    <th>Efficiency</th>
+                </tr>
+                @foreach (BaseBuilding building in basePlan.Buildings)
+                {
+                    <tr>
+                        <td>@building.BuildingTicker</td>
+                        <td>@building.Recipe</td>
+                        <td>@building.Constructed</td>
+                        <td>@building.Efficiency</td>
+                    </tr>
+                }
+            </table>
+        }
+        <button class="btn btn-primary">Add Building</button>
+    </div>
+    <div style="border: thin solid #2c3034;">
+        <h5>Inputs:</h5>
+    </div>
+    <div style="border: thin solid #2c3034"><h5>Outputs:</h5></div>
+</div>
+
+@code {
+    [Parameter]
+    public Planet planet { get; set; }
+    public Base basePlan { get; set; }
+
+    public string PlanetFullDesignation => !string.IsNullOrEmpty(planet.DisplayName) ? $"{planet.Designation} | {planet.DisplayName}" : planet.Designation;
+
+    public string PlanetSurface => planet.Surface ? "ROCKY" : "GASEOUS";
+
+    private string PlanetGravity => planet switch
+    {
+        { Gravity: < 0.25 } => "Low",
+        { Gravity: > 2.0 } => "High",
+        _ => "Normal"
+    };
+
+    private string PlanetTemperature => planet switch
+    {
+        {Temperature: < -25} => "Low",
+        {Temperature: > 75} => "High",
+        _ => "Normal"
+    };
+
+    private string PlanetPressure => planet switch
+    {
+        {Pressure: < 0.25} => "Low",
+        {Pressure: > 2.0} => "High",
+        _ => "Normal"
+    };
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        planet = _planetService.LoadPlanetResources(planet);
+        basePlan = new Base();
+    }
+}
