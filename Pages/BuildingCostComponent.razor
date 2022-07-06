@@ -1,0 +1,132 @@
+@using NotAnotherBasePlanner.Data
+@using System.Collections.Specialized
+@inject BuildingService BuildingService
+@inject PriceService PriceService
+<h5>Construction Costs:</h5>
+@if (BuildingCosts is not null && BuildingCosts.Count > 0)
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th></th>
+            @foreach (BuildingCost bc in BuildingCosts)
+            {
+                <th>@bc.MaterialTicker</th>
+            }
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><b>Amount:</b></td>
+            @foreach (BuildingCost bc in BuildingCosts)
+            {
+                <td>@bc.Amount</td>
+            }
+        </tr>
+        <tr>
+            <td><b>Avg. Price:</b></td>
+            @foreach (BuildingCost bc in BuildingCosts)
+            {
+                <td>
+                    @(Prices.Where(x => x.MaterialTicker == bc.MaterialTicker && x.ExchangeCode == Market)
+                        .Select(x => x.PriceAverage).First() ?? 0.00)
+                </td>
+            }
+        </tr>
+        </tbody>
+    </table>
+}
+@code {
+    [Parameter]
+    public BaseBuilding? BaseBuilding { get; set; }
+    [Parameter]
+    public Planet? Planet { get; set; }
+    
+    private Price[] Prices { get; set; }
+    private List<BuildingCost> BuildingCosts { get; set; }
+
+    private string Market => string.IsNullOrEmpty(Planet.FactionCode) ? "NC1" : $"{Planet.FactionCode}1";
+
+    protected override async void OnInitialized()
+    {
+        base.OnInitialized();
+        Prices = await PriceService.GetPricesAsync();
+        if (BaseBuilding is not null)
+        {
+            BuildingCosts = new List<BuildingCost>();
+            BuildingService.LoadBuildingCosts(BaseBuilding.Building);
+            BuildingCosts = BaseBuilding.Building.BuildingCosts;
+            AddConditionalBuildingCosts();
+        }
+    }
+
+    private void AddConditionalBuildingCosts()
+    {
+        List<BuildingCost> conditionalBuildingCosts = new List<BuildingCost>();
+        // Surface material
+        if (Planet is {Surface: true })
+        {
+            conditionalBuildingCosts.Add(new BuildingCost
+            {
+                MaterialTicker = "MCG",
+                Amount = BaseBuilding.Building.AreaCost * 4
+            });
+        }
+        else
+        {
+            conditionalBuildingCosts.Add(new BuildingCost
+            {
+                MaterialTicker = "AEF",
+                Amount = BaseBuilding.Building.AreaCost / 3
+            });
+        }
+
+        // Gravity materials
+        var gravityCost = Planet switch {
+            { Gravity: < 0.25 } => new BuildingCost
+            {
+                MaterialTicker = "MGC", Amount = 1
+            },
+            { Gravity: > 2.5 } => new BuildingCost
+            {
+                MaterialTicker = "BL", Amount = 1
+            },
+            _ => null
+        };
+
+        if (gravityCost != null) conditionalBuildingCosts.Add(gravityCost);
+
+    // Temperature materials
+        var temperatureCost = Planet switch {
+            { Temperature: < -25 } => new BuildingCost
+            {
+                MaterialTicker = "INS", Amount = BaseBuilding.Building.AreaCost * 10
+            },
+            { Temperature: > 75 } => new BuildingCost
+            {
+                MaterialTicker = "TSH", Amount = 1
+            },
+            _ => null
+        };
+
+        if (temperatureCost != null) conditionalBuildingCosts.Add(temperatureCost);
+
+    // Pressure materials
+        var pressureCost = Planet switch{
+            { Pressure: < 0.25 } => new BuildingCost
+            {
+                MaterialTicker = "SEA", Amount = 1
+            },
+            { Pressure: > 2.0 } => new BuildingCost
+            {
+                MaterialTicker = "HSE", Amount = 1
+            },
+            _ => null
+        };
+
+        if (pressureCost != null) conditionalBuildingCosts.Add(pressureCost);
+
+        BuildingCosts.AddRange(conditionalBuildingCosts);
+        StateHasChanged();
+    }
+}

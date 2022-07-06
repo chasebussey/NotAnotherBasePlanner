@@ -52,7 +52,7 @@ public class BuildingService
     public async Task<Building> GetBuildingByTickerAsync(string ticker)
     {
         // safe since Ticker should be unique
-        return await DbContext.Buildings.FirstAsync(x => x.Ticker.Equals(ticker, StringComparison.InvariantCultureIgnoreCase));
+        return await DbContext.Buildings.FirstAsync(x => x.Ticker.Equals(ticker));
     }
 
     // TODO: Determine if there is any need for update, create, delete
@@ -67,5 +67,10 @@ public class BuildingService
     public BuildingCost[] GetBuildingCostsByTicker(string ticker)
     {
         return DbContext.BuildingCosts.Where(x => x.BuildingTicker == ticker).ToArray();
+    }
+
+    public void LoadBuildingCosts(Building b)
+    {
+        DbContext.Entry(b).Collection(x => x.BuildingCosts).Load();
     }
 }

@@ -1,6 +1,8 @@
 @using NotAnotherBasePlanner.Data
 @using Microsoft.CodeAnalysis.CSharp.Syntax
-@inject PlanetService _planetService
+@using NotAnotherBasePlanner.Pages
+@inject PlanetService PlanetService
+@inject BuildingService BuildingService
 <h3>New Base: @PlanetFullDesignation</h3>
 
 <div style="display: flex">
@@ -22,12 +24,13 @@
         
         @if (basePlan.Buildings != null && basePlan.Buildings.Count > 0)
         {
-            <table>
+            <table class="table">
                 <tr>
                     <th>Ticker</th>
                     <th>Recipe</th>
                     <th>Constructed?</th>
                     <th>Efficiency</th>
+                    <th>Actions</th>
                 </tr>
                 @foreach (BaseBuilding building in basePlan.Buildings)
                 {
@@ -36,11 +39,23 @@
                         <td>@building.Recipe</td>
                         <td>@building.Constructed</td>
                         <td>@building.Efficiency</td>
+                        <td><button type="button" @onclick="SetShowCosts">Show Costs</button> <button type="button" @onclick="() => MarkConstructed(building)">Construct</button></td>
                     </tr>
+                    <BuildingCostComponent BaseBuilding="@building" planet="@planet" />
                 }
             </table>
         }
-        <button class="btn btn-primary">Add Building</button>
+        @if (!addBuilding)
+        {
+            <button class="btn btn-primary" type="button" @onclick="DisplayAddBuildingForm">Add Building</button>
+        }
+        else
+        {
+            <form @onsubmit="() => AddBuilding(buildingTicker)">
+                <input type="text" @bind="buildingTicker"/>
+                <button>Add</button>
+            </form>
+        }
     </div>
     <div style="border: thin solid #2c3034;">
         <h5>Inputs:</h5>
@@ -52,6 +67,8 @@
     [Parameter]
     public Planet planet { get; set; }
     public Base basePlan { get; set; }
+    public string buildingTicker { get; set; }
+    public bool addBuilding { get; set; }
 
     public string PlanetFullDesignation => !string.IsNullOrEmpty(planet.DisplayName) ? $"{planet.Designation} | {planet.DisplayName}" : planet.Designation;
 
@@ -60,7 +77,7 @@
     private string PlanetGravity => planet switch
     {
         { Gravity: < 0.25 } => "Low",
-        { Gravity: > 2.0 } => "High",
+        { Gravity: > 2.5 } => "High",
         _ => "Normal"
     };
 
@@ -81,7 +98,42 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        planet = _planetService.LoadPlanetResources(planet);
+        planet = PlanetService.LoadPlanetResources(planet);
         basePlan = new Base();
+        basePlan.Buildings = new List<BaseBuilding>();
+        AddBuilding("CM");
     }
+
+    public async void AddBuilding(string buildingTicker)
+    {
+        Building building = await BuildingService.GetBuildingByTickerAsync(buildingTicker);
+        BaseBuilding baseBuilding = new BaseBuilding
+        {
+            BuildingTicker = buildingTicker,
+            Building = building,
+            BaseId = basePlan.Id,
+            Efficiency = 0.0,
+            Constructed = false
+        };
+        
+        basePlan.Buildings.Add(baseBuilding);
+        HideAddBuildingForm();
+    }
+
+    public void DisplayAddBuildingForm()
+    {
+        addBuilding = true;
+    }
+
+    public void HideAddBuildingForm()
+    {
+        addBuilding = false;
+        this.StateHasChanged();
+    }
+
+    public void MarkConstructed(BaseBuilding building)
+    {
+        building.Constructed = true;
+    }
+    public void SetShowCosts(){}
 }
