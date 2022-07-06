@@ -13,7 +13,9 @@
     @if (Value is not null)
     {
         <div class="value">
-            <h4><span class="badge badge-success">@Value</span></h4>
+            <h4>
+                <span class="badge badge-success">@Value</span>
+            </h4>
         </div>
     }
 </div>
@@ -24,13 +26,22 @@
 }
 
 @code {
-    [Parameter] public RenderFragment ChildContent { get; set; }
-    [Parameter] public bool Collapsed { get; set; }
-    [Parameter] public string Title { get; set; }
-    [Parameter] public string Value { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public bool Collapsed { get; set; }
+
+    [Parameter]
+    public string Title { get; set; }
+
+    [Parameter]
+    public string Value { get; set; }
 
     void Toggle()
     {
         Collapsed = !Collapsed;
     }
+
 }

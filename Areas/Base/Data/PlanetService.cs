@@ -5,81 +5,89 @@ namespace NotAnotherBasePlanner.Data;
 
 public class PlanetService
 {
-    private PlannerContext DbContext { get; set; }
-    private MaterialService MaterialService { get; set; }
-    public PlanetService(PlannerContext dbContext)
-    {
-        this.DbContext = dbContext;
-    }
+	public PlanetService(PlannerContext dbContext)
+	{
+		DbContext = dbContext;
+	}
 
-    public PlanetService(PlannerContext dbContext, MaterialService materialService)
-    {
-        this.DbContext = dbContext;
-        this.MaterialService = materialService;
-    }
+	public PlanetService(PlannerContext dbContext, MaterialService materialService)
+	{
+		DbContext       = dbContext;
+		MaterialService = materialService;
+	}
 
-    public async void UpdateAllPlanetsFromFIO()
-    {
-        List<Planet>? planets = new List<Planet>();
+	private PlannerContext DbContext { get; }
+	private MaterialService MaterialService { get; }
 
-        HttpClient fioClient = new HttpClient();
-        HttpResponseMessage response = await fioClient.GetAsync("https://rest.fnar.net/planet/allplanets/full");
+	public async void UpdateAllPlanetsFromFIO()
+	{
+		var planets = new List<Planet>();
 
-        if (response.IsSuccessStatusCode)
-        {
-            using var contentStream = await response.Content.ReadAsStreamAsync();
+		var fioClient = new HttpClient();
+		var response  = await fioClient.GetAsync("https://rest.fnar.net/planet/allplanets/full");
 
-            planets = await JsonSerializer.DeserializeAsync<List<Planet>>(contentStream);
-        }
+		if (response.IsSuccessStatusCode)
+		{
+			using var contentStream = await response.Content.ReadAsStreamAsync();
 
-        foreach (Planet planet in planets)
-        {
-            foreach (Resource resource in planet.Resources)
-            {
-                resource.Material = MaterialService.GetMaterialByFIOId(resource.FIOId);
-                resource.MaterialTicker = resource.Material.Ticker;
-            }
-            if (!DbContext.Planets.Select(p => p.Designation).ToList().Contains(planet.Designation))
-            {
-                DbContext.Planets.Add(planet);
-            }
-            // TODO: We'll need an update eventually, but likely not till the universe resets
-        }
+			planets = await JsonSerializer.DeserializeAsync<List<Planet>>(contentStream);
+		}
 
-        DbContext.SaveChanges();
-    }
+		foreach (var planet in planets)
+		{
+			foreach (var resource in planet.Resources)
+			{
+				resource.Material       = MaterialService.GetMaterialByFIOId(resource.FIOId);
+				resource.MaterialTicker = resource.Material.Ticker;
+			}
 
-    public async Task<Planet> GetPlanetByDesignationOrDisplayName(string searchString)
-    {
-        return await DbContext.Planets.FirstOrDefaultAsync(x =>
-            x.Designation.Equals(searchString, StringComparison.InvariantCultureIgnoreCase) ||
-            (x.DisplayName != null && x.DisplayName.Equals(searchString, StringComparison.InvariantCultureIgnoreCase)));
-    }
+			if (!DbContext.Planets.Select(p => p.Designation).ToList().Contains(planet.Designation))
+				DbContext.Planets.Add(planet);
+			// TODO: We'll need an update eventually, but likely not till the universe resets
+		}
 
-    public async Task<Planet[]> GetPlanetsByFactionCode(string factionCode)
-    {
-        return await DbContext.Planets.Where(x =>
-            x.FactionCode != null && x.FactionCode.Equals(factionCode, StringComparison.InvariantCultureIgnoreCase))
-            .ToArrayAsync();
-    }
+		DbContext.SaveChanges();
+	}
 
-    public async Task<Planet[]> GetPlanetsLikeDesignationOrDisplayNameAsync(string searchString)
-    {
-        return await DbContext.Planets.Where(x =>
-            x.Designation.Contains(searchString) ||
-            (x.DisplayName != null && x.DisplayName.Contains(searchString))).ToArrayAsync();
-    }
+	public async Task<Planet> GetPlanetByDesignationOrDisplayName(string searchString)
+	{
+		return await DbContext.Planets.FirstOrDefaultAsync(x =>
+			                                                   x.Designation.Equals(
+				                                                   searchString,
+				                                                   StringComparison.InvariantCultureIgnoreCase) ||
+			                                                   (x.DisplayName != null &&
+			                                                    x.DisplayName.Equals(
+				                                                    searchString,
+				                                                    StringComparison.InvariantCultureIgnoreCase)));
+	}
 
-    public Planet[] GetPlanetsLikeDesignationOrDisplayName(string searchString)
-    {
-        return DbContext.Planets.Where(x =>
-            x.Designation.Contains(searchString) ||
-            (x.DisplayName != null && x.DisplayName.Contains(searchString))).ToArray();
-    }
+	public async Task<Planet[]> GetPlanetsByFactionCode(string factionCode)
+	{
+		return await DbContext.Planets.Where(x =>
+			                                     x.FactionCode != null &&
+			                                     x.FactionCode.Equals(factionCode,
+			                                                          StringComparison.InvariantCultureIgnoreCase))
+		                      .ToArrayAsync();
+	}
 
-    public Planet LoadPlanetResources(Planet planet)
-    {
-        DbContext.Entry(planet).Collection(x => x.Resources).Load();
-        return planet;
-    }
+	public async Task<Planet[]> GetPlanetsLikeDesignationOrDisplayNameAsync(string searchString)
+	{
+		return await DbContext.Planets.Where(x =>
+			                                     x.Designation.Contains(searchString) ||
+			                                     (x.DisplayName != null && x.DisplayName.Contains(searchString)))
+		                      .ToArrayAsync();
+	}
+
+	public Planet[] GetPlanetsLikeDesignationOrDisplayName(string searchString)
+	{
+		return DbContext.Planets.Where(x =>
+			                               x.Designation.Contains(searchString) ||
+			                               (x.DisplayName != null && x.DisplayName.Contains(searchString))).ToArray();
+	}
+
+	public Planet LoadPlanetResources(Planet planet)
+	{
+		DbContext.Entry(planet).Collection(x => x.Resources).Load();
+		return planet;
+	}
 }

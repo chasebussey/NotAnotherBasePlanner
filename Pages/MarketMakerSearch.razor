@@ -1,8 +1,7 @@
 @page "/market-maker-search"
+@using NotAnotherBasePlanner.Data
 
 <PageTitle>Search for Market Makers</PageTitle>
-
-@using NotAnotherBasePlanner.Data
 @inject MaterialService MaterialService
 @inject PriceService PriceService
 @inject RecipeService RecipeService
@@ -11,8 +10,8 @@
 
 <h1>Search for Market Makers</h1>
 
-<input type="text" @bind="materialTicker" placeholder="Material Ticker (optional)" />
-<input type="text" @bind="expertiseString" placeholder="Expertise, comma separated." style="width:50%" />
+<input type="text" @bind="materialTicker" placeholder="Material Ticker (optional)"/>
+<input type="text" @bind="expertiseString" placeholder="Expertise, comma separated." style="width:50%"/>
 <button type="submit" @onclick="SearchPrices">Search</button>
 
 @if (mmInfo == null)
@@ -22,7 +21,7 @@
 else
 {
     <table class="table">
-    <thead>
+        <thead>
         <tr>
             <td>Material Ticker</td>
             <td>Market Maker Buy</td>
@@ -30,21 +29,22 @@ else
             <td>Building</td>
             <td>Expertise</td>
         </tr>
-    </thead>
-    <tbody>
-        @foreach (MarketMakerInfo info in mmInfo)
-            {
-                <tr>
-                    <td>@info.MaterialTicker</td>
-                    <td>@info.MarketMakerBuy</td>
-                    <td>@info.RecipeName</td>
-                    <td>@info.BuildingTicker</td>
-                    <td>@info.Expertise</td>
-                </tr>
-            }
+        </thead>
+        <tbody>
+        @foreach (var info in mmInfo)
+        {
+            <tr>
+                <td>@info.MaterialTicker</td>
+                <td>@info.MarketMakerBuy</td>
+                <td>@info.RecipeName</td>
+                <td>@info.BuildingTicker</td>
+                <td>@info.Expertise</td>
+            </tr>
+        }
         </tbody>
     </table>
 }
+
 @code {
     private Material[]? materials;
     private Price[]? prices;
@@ -71,23 +71,24 @@ else
             materialRecipes = MaterialRecipeService.GetMaterialRecipes();
         }
     }
+
     private void SearchPrices()
     {
         IEnumerable<MarketMakerInfo> query =
-        from material in materials
-        join price in prices on material.Ticker equals price.MaterialTicker
-        join materialRecipe in materialRecipes on material.Ticker equals materialRecipe.MaterialTicker
-        join recipe in recipes on materialRecipe.RecipeId equals recipe.RecipeId
-        join building in buildings on recipe.BuildingTicker equals building.Ticker
-        where price.MarketMakerBuy != null && price.ExchangeCode == "NC1"
-        select new MarketMakerInfo
-        {
-            MaterialTicker = material.Ticker,
-            MarketMakerBuy = price.MarketMakerBuy ??= 0,
-            RecipeName = recipe.RecipeName,
-            BuildingTicker = building.Ticker,
-            Expertise = building.Expertise
-        };
+            from material in materials
+            join price in prices on material.Ticker equals price.MaterialTicker
+            join materialRecipe in materialRecipes on material.Ticker equals materialRecipe.MaterialTicker
+            join recipe in recipes on materialRecipe.RecipeId equals recipe.RecipeId
+            join building in buildings on recipe.BuildingTicker equals building.Ticker
+            where price.MarketMakerBuy != null && price.ExchangeCode == "NC1"
+            select new MarketMakerInfo
+            {
+                MaterialTicker = material.Ticker,
+                MarketMakerBuy = price.MarketMakerBuy ??= 0,
+                RecipeName = recipe.RecipeName,
+                BuildingTicker = building.Ticker,
+                Expertise = building.Expertise
+            };
 
         if (!string.IsNullOrEmpty(materialTicker))
         {
@@ -97,7 +98,7 @@ else
         if (!string.IsNullOrEmpty(expertiseString))
         {
             expertiseString = expertiseString.Replace(" ", "");
-            string[] expertises = string.IsNullOrEmpty(expertiseString) ? null : expertiseString.Split(',');
+            var expertises = string.IsNullOrEmpty(expertiseString) ? null : expertiseString.Split(',');
 
             query = query.Where(x => expertises.Contains(x.Expertise, StringComparer.InvariantCultureIgnoreCase));
         }
@@ -113,4 +114,5 @@ else
         public string BuildingTicker { get; set; }
         public string Expertise { get; set; }
     }
+
 }

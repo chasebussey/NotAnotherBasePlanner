@@ -1,62 +1,60 @@
 using System.Text.Json;
-using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
 namespace NotAnotherBasePlanner.Data;
 
 public class RecipeService
 {
-    private PlannerContext DbContext { get; set; }
+	public RecipeService(PlannerContext dbContext)
+	{
+		DbContext = dbContext;
+	}
 
-    public RecipeService(PlannerContext dbContext)
-    {
-        this.DbContext = dbContext;
-    }
-    public async void UpdateAllRecipesFromFIO()
-    {
-        List<Recipe>? recipes = new List<Recipe>();
+	private PlannerContext DbContext { get; }
 
-        HttpClient fioClient = new HttpClient();
-        HttpResponseMessage response = await fioClient.GetAsync("https://rest.fnar.net/recipes/allrecipes");
+	public async void UpdateAllRecipesFromFIO()
+	{
+		var recipes = new List<Recipe>();
 
-        if (response.IsSuccessStatusCode)
-        {
-            using var contentStream = await response.Content.ReadAsStreamAsync();
-            recipes = await JsonSerializer.DeserializeAsync<List<Recipe>>(contentStream);
-        }
+		var fioClient = new HttpClient();
+		var response  = await fioClient.GetAsync("https://rest.fnar.net/recipes/allrecipes");
 
-        foreach (Recipe recipe in recipes)
-        {
-            DbContext.Recipes.Add(recipe);
-        }
+		if (response.IsSuccessStatusCode)
+		{
+			using var contentStream = await response.Content.ReadAsStreamAsync();
+			recipes = await JsonSerializer.DeserializeAsync<List<Recipe>>(contentStream);
+		}
 
-        DbContext.SaveChanges();
-    }
+		foreach (var recipe in recipes) DbContext.Recipes.Add(recipe);
 
-    public async Task<Recipe[]> GetRecipesAsync()
-    {
-        return await DbContext.Recipes.ToArrayAsync();
-    }
+		DbContext.SaveChanges();
+	}
 
-    public Recipe[] GetRecipes()
-    {
-        return DbContext.Recipes.ToArray();
-    }
+	public async Task<Recipe[]> GetRecipesAsync()
+	{
+		return await DbContext.Recipes.ToArrayAsync();
+	}
 
-    public async Task<Recipe[]> GetRecipesByOutputAsync(string outputTicker)
-    {
-        return await DbContext.Recipes.Where(x => x.Outputs.Contains(outputTicker)).ToArrayAsync();
-    }
+	public Recipe[] GetRecipes()
+	{
+		return DbContext.Recipes.ToArray();
+	}
 
-    public async Task<Recipe[]> GetRecipesByInputAsync(string inputTicker)
-    {
-        return await DbContext.Recipes.Where(x => x.Inputs.Contains(inputTicker)).ToArrayAsync();
-    }
+	public async Task<Recipe[]> GetRecipesByOutputAsync(string outputTicker)
+	{
+		return await DbContext.Recipes.Where(x => x.Outputs.Contains(outputTicker)).ToArrayAsync();
+	}
 
-    public async Task<Recipe[]> GetRecipesByBuildingAsync(string buildingTicker)
-    {
-        return await DbContext.Recipes.Where(x =>
-            x.BuildingTicker.Equals(buildingTicker, StringComparison.InvariantCultureIgnoreCase))
-            .ToArrayAsync();
-    }
+	public async Task<Recipe[]> GetRecipesByInputAsync(string inputTicker)
+	{
+		return await DbContext.Recipes.Where(x => x.Inputs.Contains(inputTicker)).ToArrayAsync();
+	}
+
+	public async Task<Recipe[]> GetRecipesByBuildingAsync(string buildingTicker)
+	{
+		return await DbContext.Recipes.Where(x =>
+			                                     x.BuildingTicker.Equals(
+				                                     buildingTicker, StringComparison.InvariantCultureIgnoreCase))
+		                      .ToArrayAsync();
+	}
 }

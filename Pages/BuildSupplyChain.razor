@@ -1,8 +1,7 @@
 @page "/supply-chain"
+@using NotAnotherBasePlanner.Data
 
 <PageTitle>Generate supply chain</PageTitle>
-
-@using NotAnotherBasePlanner.Data
 @inject ILogger<BuildSupplyChain> logger
 @inject MaterialService MaterialService
 @inject PriceService PriceService
@@ -12,8 +11,8 @@
 
 <h1>Generate a supply chain</h1>
 
-<input type="text" @bind="materialTicker" placeholder="Material Ticker" />
-<input type="text" @bind="exchangeCode" placeholder="Exchange Code (NC1, etc)" />
+<input type="text" @bind="materialTicker" placeholder="Material Ticker"/>
+<input type="text" @bind="exchangeCode" placeholder="Exchange Code (NC1, etc)"/>
 <button type="submit" @onclick="GetBaseRecipe">Generate</button>
 
 @if (recipeNode is not null)
@@ -26,21 +25,21 @@
     @recipeNode.Recipe.BuildingTicker
     <br />
     </div> *@
-    string title = string.Join(',', recipeNode.Recipe.Outputs);
+    var title = string.Join(',', recipeNode.Recipe.Outputs);
     <Collapsible Collapsed=true Title=@title>
-    <h5>Building: </h5><span>@recipeNode.Recipe.BuildingTicker</span>
-    <h5>Recipe: </h5>@recipeNode.Recipe.RecipeName
-    <h5>Inputs:</h5>
-    @foreach (RecipeNode child in recipeNode.Children)
+        <h5>Building: </h5><span>@recipeNode.Recipe.BuildingTicker</span>
+        <h5>Recipe: </h5>@recipeNode.Recipe.RecipeName
+        <h5>Inputs:</h5>
+        @foreach (var child in recipeNode.Children)
         {
             <SupplyChain recipeNode=child depth=1></SupplyChain>
         }
-        </Collapsible>
+    </Collapsible>
 }
 
 
 @code {
-    private Recipe[] recipes = null;
+    private Recipe[] recipes;
     private string? materialTicker;
     private string? exchangeCode;
     private RecipeNode? recipeNode;
@@ -72,25 +71,26 @@
             return;
         }
 
-        foreach (string input in node.Recipe.Inputs)
+        foreach (var input in node.Recipe.Inputs)
         {
-            Recipe[] tempRecipes = this.recipes.Where(x => x.Outputs.Contains(input)).ToArray();
+            Recipe[] tempRecipes = recipes.Where(x => x.Outputs.Contains(input)).ToArray();
 
             if (tempRecipes is null || tempRecipes.Length == 0)
             {
                 return;
             }
 
-            Recipe tempRecipe = tempRecipes[0];
+            var tempRecipe = tempRecipes[0];
 
             node.AddChild(tempRecipe);
 
-            //AddChildRecipes(node.GetChild(0));
+    //AddChildRecipes(node.GetChild(0));
         }
 
-        foreach (RecipeNode child in node.Children)
+        foreach (var child in node.Children)
         {
             AddChildRecipes(child);
         }
     }
+
 }

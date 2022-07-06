@@ -1,25 +1,31 @@
 ﻿@page "/"
-@using NotAnotherBasePlanner.Data;
+@using NotAnotherBasePlanner.Data
 @inject MaterialService MaterialService
 @inject PlanetService PlanetService
 <PageTitle>NABP</PageTitle>
 
 <h1>Not Another Base Planner</h1>
 
-<p>NABP <del>is</del> will soon be a whole collection of tools to plan your economic empire in Prosperous Universe.
+<p>
+    NABP <del>is</del> will soon be a whole collection of tools to plan your economic empire in Prosperous Universe.
     Right
-    now, it's a search tool for market maker products and a really poor supply chain visualizer.</p>
+    now, it's a search tool for market maker products and a really poor supply chain visualizer.
+</p>
 
-<p>This application is currently under development by Pryde, of Pryde Industrial Technologies. If you'd like to support
-    development, consider reaching out in-game to schedule a PE purchase.</p>
+<p>
+    This application is currently under development by Pryde, of Pryde Industrial Technologies. If you'd like to support
+    development, consider reaching out in-game to schedule a PE purchase.
+</p>
 
 If you're a GTU member, you get to make feature requests on the Discord!
 
 @code {
+
     protected override void OnInitialized()
     {
-        //MaterialService.UpdateAllMaterialsFromFIO();
-        //PlanetService.UpdateAllPlanetsFromFIO();
+    //MaterialService.UpdateAllMaterialsFromFIO();
+    //PlanetService.UpdateAllPlanetsFromFIO();
         base.OnInitialized();
     }
+
 }

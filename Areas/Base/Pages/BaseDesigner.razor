@@ -1,5 +1,4 @@
 @using NotAnotherBasePlanner.Data
-@using Microsoft.CodeAnalysis.CSharp.Syntax
 @using NotAnotherBasePlanner.Pages
 @inject PlanetService PlanetService
 @inject BuildingService BuildingService
@@ -13,15 +12,16 @@
         Temperature: @PlanetTemperature<br/>
         Pressure: @PlanetPressure
         <hr/>
-        @foreach (Resource res in planet.Resources)
+        @foreach (var res in planet.Resources)
         {
-            <text>@res.MaterialTicker | @res.Type | @res.Concentration.ToString("F2")</text><br/>
+            <text>@res.MaterialTicker | @res.Type | @res.Concentration.ToString("F2")</text>
+            <br/>
         }
     </div>
 
     <div class="" style="border: thin solid #2c3034;flex-grow: 4">
         <h5>Buildings:</h5>
-        
+
         @if (basePlan.Buildings != null && basePlan.Buildings.Count > 0)
         {
             <table class="table">
@@ -32,16 +32,18 @@
                     <th>Efficiency</th>
                     <th>Actions</th>
                 </tr>
-                @foreach (BaseBuilding building in basePlan.Buildings)
+                @foreach (var building in basePlan.Buildings)
                 {
                     <tr>
                         <td>@building.BuildingTicker</td>
                         <td>@building.Recipe</td>
                         <td>@building.Constructed</td>
                         <td>@building.Efficiency</td>
-                        <td><button type="button" @onclick="SetShowCosts">Show Costs</button> <button type="button" @onclick="() => MarkConstructed(building)">Construct</button></td>
+                        <td>
+                            <button type="button" @onclick="SetShowCosts">Show Costs</button> <button type="button" @onclick="() => MarkConstructed(building)">Construct</button>
+                        </td>
                     </tr>
-                    <BuildingCostComponent BaseBuilding="@building" planet="@planet" />
+                    <BuildingCostComponent BaseBuilding="@building" planet="@planet"/>
                 }
             </table>
         }
@@ -60,12 +62,16 @@
     <div style="border: thin solid #2c3034;">
         <h5>Inputs:</h5>
     </div>
-    <div style="border: thin solid #2c3034"><h5>Outputs:</h5></div>
+    <div style="border: thin solid #2c3034">
+        <h5>Outputs:</h5>
+    </div>
 </div>
 
 @code {
+
     [Parameter]
     public Planet planet { get; set; }
+
     public Base basePlan { get; set; }
     public string buildingTicker { get; set; }
     public bool addBuilding { get; set; }
@@ -76,24 +82,24 @@
 
     private string PlanetGravity => planet switch
     {
-        { Gravity: < 0.25 } => "Low",
-        { Gravity: > 2.5 } => "High",
+    { Gravity: < 0.25 } => "Low",
+    { Gravity: > 2.5 } => "High",
         _ => "Normal"
-    };
+        };
 
     private string PlanetTemperature => planet switch
     {
-        {Temperature: < -25} => "Low",
-        {Temperature: > 75} => "High",
+    {Temperature: < -25} => "Low",
+    {Temperature: > 75} => "High",
         _ => "Normal"
-    };
+        };
 
     private string PlanetPressure => planet switch
     {
-        {Pressure: < 0.25} => "Low",
-        {Pressure: > 2.0} => "High",
+    {Pressure: < 0.25} => "Low",
+    {Pressure: > 2.0} => "High",
         _ => "Normal"
-    };
+        };
 
     protected override void OnInitialized()
     {
@@ -106,8 +112,8 @@
 
     public async void AddBuilding(string buildingTicker)
     {
-        Building building = await BuildingService.GetBuildingByTickerAsync(buildingTicker);
-        BaseBuilding baseBuilding = new BaseBuilding
+        var building = await BuildingService.GetBuildingByTickerAsync(buildingTicker);
+        var baseBuilding = new BaseBuilding
         {
             BuildingTicker = buildingTicker,
             Building = building,
@@ -115,7 +121,7 @@
             Efficiency = 0.0,
             Constructed = false
         };
-        
+
         basePlan.Buildings.Add(baseBuilding);
         HideAddBuildingForm();
     }
@@ -128,12 +134,16 @@
     public void HideAddBuildingForm()
     {
         addBuilding = false;
-        this.StateHasChanged();
+        StateHasChanged();
     }
 
     public void MarkConstructed(BaseBuilding building)
     {
         building.Constructed = true;
     }
-    public void SetShowCosts(){}
+
+    public void SetShowCosts()
+    {
+    }
+
 }

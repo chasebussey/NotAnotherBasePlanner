@@ -3,8 +3,8 @@
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
-            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
+            <FocusOnNavigate RouteData="@routeData" Selector="h1"/>
         </Found>
         <NotFound>
             <PageTitle>Not found</PageTitle>
@@ -16,6 +16,7 @@
 </CascadingAuthenticationState>
 
 @code {
+
     [Parameter]
     public InitialApplicationState InitialState { get; set; }
 
@@ -24,4 +25,5 @@
         TokenProvider.XsrfToken = InitialState.XsrfToken;
         return base.OnInitializedAsync();
     }
+
 }

@@ -1,8 +1,7 @@
 @page "/buildings"
+@using NotAnotherBasePlanner.Data
 
 <PageTitle>Buildings</PageTitle>
-
-@using NotAnotherBasePlanner.Data
 @inject BuildingService buildingService
 
 <h1>Buildings</h1>
@@ -12,29 +11,31 @@
 <button class="submit" @onclick="UpdateBuildings">Update Buildings</button>
 @if (buildings == null)
 {
-    <p><em>Loading...</em></p>
+    <p>
+        <em>Loading...</em>
+    </p>
 }
 else
 {
     <table class="table">
-    <thead>
+        <thead>
         <tr>
             <th>Ticker</th>
             <th>Name</th>
             <th>Expertise</th>
             <th>AreaCost</th>
         </tr>
-    </thead>
-    <tbody>
+        </thead>
+        <tbody>
         @foreach (var building in buildings)
-            {
-                <tr>
-                    <td>@building.Ticker</td>
-                    <td>@building.Name</td>
-                    <td>@building.Expertise</td>
-                    <td>@building.AreaCost</td>
-                </tr>
-            }
+        {
+            <tr>
+                <td>@building.Ticker</td>
+                <td>@building.Name</td>
+                <td>@building.Expertise</td>
+                <td>@building.AreaCost</td>
+            </tr>
+        }
         </tbody>
     </table>
 }
@@ -57,4 +58,5 @@ else
     {
         buildingService.UpdateAllBuildingsFromFIO();
     }
+
 }

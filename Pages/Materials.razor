@@ -1,8 +1,7 @@
 @page "/materials"
+@using NotAnotherBasePlanner.Data
 
 <PageTitle>Materials</PageTitle>
-
-@using NotAnotherBasePlanner.Data
 @inject MaterialService MaterialService
 
 <h1>Materials</h1>
@@ -11,12 +10,14 @@
 
 @if (materials == null)
 {
-    <p><em>Loading...</em></p>
+    <p>
+        <em>Loading...</em>
+    </p>
 }
 else
 {
     <table class="table">
-    <thead>
+        <thead>
         <tr>
             <th>Ticker</th>
             <th>Name</th>
@@ -24,18 +25,18 @@ else
             <th>Weight</th>
             <th>Volume</th>
         </tr>
-    </thead>
-    <tbody>
+        </thead>
+        <tbody>
         @foreach (var material in materials)
-            {
-                <tr>
-                    <td>@material.Ticker</td>
-                    <td>@material.Name</td>
-                    <td>@material.CategoryName</td>
-                    <td>@material.Weight</td>
-                    <td>@material.Volume</td>
-                </tr>
-            }
+        {
+            <tr>
+                <td>@material.Ticker</td>
+                <td>@material.Name</td>
+                <td>@material.CategoryName</td>
+                <td>@material.Weight</td>
+                <td>@material.Volume</td>
+            </tr>
+        }
         </tbody>
     </table>
 }
@@ -53,4 +54,5 @@ else
             materials = await MaterialService.GetMaterialsAsync();
         }
     }
+
 }

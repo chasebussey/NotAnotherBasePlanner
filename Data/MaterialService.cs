@@ -1,81 +1,80 @@
 using System.Text.Json;
-using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
 namespace NotAnotherBasePlanner.Data;
 
 public class MaterialService
 {
-    private PlannerContext DbContext { get; set; }
+	public MaterialService(PlannerContext dbContext)
+	{
+		DbContext = dbContext;
+	}
 
-    public MaterialService(PlannerContext dbContext)
-    {
-        this.DbContext = dbContext;
-    }
-    public async void UpdateAllMaterialsFromFIO()
-    {
-        List<Material>? materials = new List<Material>();
+	private PlannerContext DbContext { get; }
 
-        HttpClient fioClient = new HttpClient();
-        HttpResponseMessage response = await fioClient.GetAsync("https://rest.fnar.net/material/allmaterials");
+	public async void UpdateAllMaterialsFromFIO()
+	{
+		var materials = new List<Material>();
 
-        if (response.IsSuccessStatusCode)
-        {
-            using var contentStream = await response.Content.ReadAsStreamAsync();
+		var fioClient = new HttpClient();
+		var response  = await fioClient.GetAsync("https://rest.fnar.net/material/allmaterials");
 
-            materials = await JsonSerializer.DeserializeAsync<List<Material>>(contentStream);
-        }
+		if (response.IsSuccessStatusCode)
+		{
+			using var contentStream = await response.Content.ReadAsStreamAsync();
 
-        foreach (Material material in materials)
-        {
-            if (DbContext.Materials.Contains(material))
-            {
-                Material curr = DbContext.Materials.Where(x => x.Ticker == material.Ticker).First();
-                curr.CategoryName = material.CategoryName;
-                curr.FIOId = material.FIOId;
-                curr.Name = material.Name;
-                curr.Volume = material.Volume;
-                curr.Weight = material.Weight;
-            }
-            else
-            {
-                DbContext.Materials.Add(material);
-            }
-        }
+			materials = await JsonSerializer.DeserializeAsync<List<Material>>(contentStream);
+		}
 
-        DbContext.SaveChanges();
-    }
+		foreach (var material in materials)
+			if (DbContext.Materials.Contains(material))
+			{
+				var curr = DbContext.Materials.Where(x => x.Ticker == material.Ticker).First();
+				curr.CategoryName = material.CategoryName;
+				curr.FIOId        = material.FIOId;
+				curr.Name         = material.Name;
+				curr.Volume       = material.Volume;
+				curr.Weight       = material.Weight;
+			}
+			else
+			{
+				DbContext.Materials.Add(material);
+			}
 
-    public async Task<Material[]> GetMaterialsAsync()
-    {
-        return await DbContext.Materials.ToArrayAsync();
-    }
+		DbContext.SaveChanges();
+	}
 
-    public async Task<Material> GetMaterialByTickerAsync(string ticker)
-    {
-        return await DbContext.Materials.FirstAsync(x => x.Ticker == ticker);
-    }
+	public async Task<Material[]> GetMaterialsAsync()
+	{
+		return await DbContext.Materials.ToArrayAsync();
+	}
 
-    public Material GetMaterialByTicker(string ticker)
-    {
-        return DbContext.Materials.First(x => x.Ticker == ticker);
-    }
+	public async Task<Material> GetMaterialByTickerAsync(string ticker)
+	{
+		return await DbContext.Materials.FirstAsync(x => x.Ticker == ticker);
+	}
 
-    public async Task<Material> GetMaterialByFIOIdAsync(string FIOId)
-    {
-        return await DbContext.Materials.FirstAsync(x => x.FIOId == FIOId);
-    }
+	public Material GetMaterialByTicker(string ticker)
+	{
+		return DbContext.Materials.First(x => x.Ticker == ticker);
+	}
 
-    public Material GetMaterialByFIOId(string FIOId)
-    {
-        return DbContext.Materials.First(x => x.FIOId == FIOId);
-    }
+	public async Task<Material> GetMaterialByFIOIdAsync(string FIOId)
+	{
+		return await DbContext.Materials.FirstAsync(x => x.FIOId == FIOId);
+	}
 
-    public async Task<Material[]> GetMaterialsByCategoryAsync(string category)
-    {
-        return await DbContext.Materials.Where(x =>
-            !string.IsNullOrEmpty(x.CategoryName) &&
-            x.CategoryName.Equals(category, StringComparison.InvariantCultureIgnoreCase))
-            .ToArrayAsync();
-    }
+	public Material GetMaterialByFIOId(string FIOId)
+	{
+		return DbContext.Materials.First(x => x.FIOId == FIOId);
+	}
+
+	public async Task<Material[]> GetMaterialsByCategoryAsync(string category)
+	{
+		return await DbContext.Materials.Where(x =>
+			                                       !string.IsNullOrEmpty(x.CategoryName) &&
+			                                       x.CategoryName.Equals(
+				                                       category, StringComparison.InvariantCultureIgnoreCase))
+		                      .ToArrayAsync();
+	}
 }

@@ -1,8 +1,7 @@
 @page "/building-info"
+@using NotAnotherBasePlanner.Data
 
 <PageTitle>Building Info</PageTitle>
-
-@using NotAnotherBasePlanner.Data
 @inject MaterialService MaterialService
 @inject PriceService PriceService
 @inject BuildingService BuildingService
@@ -11,7 +10,7 @@
 <h1>Get Building Information</h1>
 
 <form @onsubmit="Search">
-    <input type="text" @bind="buildingSearchString" placeholder="Building Ticker" />
+    <input type="text" @bind="buildingSearchString" placeholder="Building Ticker"/>
     <select id="market" @bind="market">
         <option value="" selected disabled hidden>Nearest CX</option>
         <option value="NC1">NC1</option>
@@ -24,110 +23,130 @@
     <button type="submit">Search</button>
     <button @onclick="Clear">Clear</button>
 </form>
-<br /><br />
+<br/><br/>
 
 @if (buildingCosts != null)
 {
     <div style="white-space: nowrap;">
-    <h3 style="display: inline-block;">Building Information: </h3>
-    <h5 style="display: inline-block">@string.Join(" | ", buildingTickers).ToUpper()</h5>
-</div>
+        <h3 style="display: inline-block;">Building Information: </h3>
+        <h5 style="display: inline-block">@string.Join(" | ", buildingTickers).ToUpper()</h5>
+    </div>
     <div style="width:50%;float:left">
-    <h5>Construction Costs Overview</h5>
-    <table class="table">
-        <thead>
+        <h5>Construction Costs Overview</h5>
+        <table class="table">
+            <thead>
             <tr>
                 <th></th>
-                @foreach (Data.BuildingCost buildingCost in buildingCosts)
-                    {
-                        <th>@buildingCost.MaterialTicker</th>
-                    }
-                </tr>
+                @foreach (var buildingCost in buildingCosts)
+                {
+                    <th>@buildingCost.MaterialTicker</th>
+                }
+            </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td><b>Amount:</b></td>
-                    @foreach (BuildingCost buildingCost in buildingCosts)
-                    {
-                        <td>@buildingCost.Amount</td>
-                    }
-                </tr>
-                <tr>
-                    <td><b>Avg. Price:</b></td>
-                    @foreach (BuildingCost buildingCost in buildingCosts)
-                    {
-                        <td>@(prices.Where(x => x.MaterialTicker == buildingCost.MaterialTicker && x.ExchangeCode ==
-                    market).Select(
-                    x => x.PriceAverage).First() ?? 0.00)
-                        </td>
-                    }
-                </tr>
+            <tr>
+                <td>
+                    <b>Amount:</b>
+                </td>
+                @foreach (var buildingCost in buildingCosts)
+                {
+                    <td>@buildingCost.Amount</td>
+                }
+            </tr>
+            <tr>
+                <td>
+                    <b>Avg. Price:</b>
+                </td>
+                @foreach (var buildingCost in buildingCosts)
+                {
+                    <td>
+                        @(prices.Where(x => x.MaterialTicker == buildingCost.MaterialTicker && x.ExchangeCode ==
+                                            market).Select(
+                                                x => x.PriceAverage).First() ?? 0.00)
+                    </td>
+                }
+            </tr>
             </tbody>
         </table>
         <div style="float:right">
             <b>Total:</b> @totalCost.ToString("F2")
         </div>
-        <br />
-        <br />
-        @foreach (Building building in searchBuildings)
+        <br/>
+        <br/>
+        @foreach (var building in searchBuildings)
         {
-            double buildingTotal = 0.0;
-            <hr style="width:100%" />
+            var buildingTotal = 0.0;
+            <hr style="width:100%"/>
             <div>
-        <h5>Contruction Costs: @building.Ticker</h5>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th></th>
-                    @foreach (BuildingCost buildingCost in building.BuildingCosts)
-                            {
-                                <th>@buildingCost.MaterialTicker</th>
-                            }
-                        </tr>
+                <h5>Contruction Costs: @building.Ticker</h5>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th></th>
+                        @foreach (var buildingCost in building.BuildingCosts)
+                        {
+                            <th>@buildingCost.MaterialTicker</th>
+                        }
+                    </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td><b>Amount:</b></td>
-                            @foreach (BuildingCost buildingCost in building.BuildingCosts)
-                            {
-                                <td>@buildingCost.Amount</td>
-                            }
-                        </tr>
-                        <tr>
-                            <td><b>Avg. Price:</b></td>
-                            @foreach (BuildingCost buildingCost in building.BuildingCosts)
-                            {
-                                double price =(prices.Where(x => x.MaterialTicker == buildingCost.MaterialTicker && x.ExchangeCode ==
-                        market).Select(
-                        x => x.PriceAverage).First() ?? 0.00);
-                                <td>@price</td>
-                                buildingTotal += price * buildingCost.Amount;
-                            }
-                        </tr>
+                    <tr>
+                        <td>
+                            <b>Amount:</b>
+                        </td>
+                        @foreach (var buildingCost in building.BuildingCosts)
+                        {
+                            <td>@buildingCost.Amount</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Avg. Price:</b>
+                        </td>
+                        @foreach (var buildingCost in building.BuildingCosts)
+                        {
+                            var price = prices.Where(x => x.MaterialTicker == buildingCost.MaterialTicker && x.ExchangeCode ==
+                                                          market).Select(
+                                                              x => x.PriceAverage).First() ?? 0.00;
+                            <td>@price</td>
+                            buildingTotal += price * buildingCost.Amount;
+                        }
+                    </tr>
                     </tbody>
                 </table>
             </div>
             <div style="float:right">
-        <b>Total:</b> @buildingTotal.ToString("F2")
-    </div>
-            <br />
-            <br />
+                <b>Total:</b> @buildingTotal.ToString("F2")
+            </div>
+            <br/>
+            <br/>
         }
     </div>
     <div style="width:45%;float:right;margin-left:5%">
-    <h5>General Overview</h5>
-    <b>Area Cost:</b> @totalAreaCost <br />
-    <b><u>Workforce:</u></b> <br />
-    <ul style="list-style-type:none">
-        <li><i>Pioneers:</i> @totalPio</li>
-        <li><i>Settlers:</i> @totalSet</li>
-        <li><i>Technicians:</i> @totalTech</li>
-        <li><i>Engineers:</i> @totalEng</li>
-        <li><i>Scientists:</i> @totalSci</li>
-    </ul>
+        <h5>General Overview</h5>
+        <b>Area Cost:</b> @totalAreaCost <br/>
+        <b>
+            <u>Workforce:</u>
+        </b> <br/>
+        <ul style="list-style-type:none">
+            <li>
+                <i>Pioneers:</i> @totalPio
+            </li>
+            <li>
+                <i>Settlers:</i> @totalSet
+            </li>
+            <li>
+                <i>Technicians:</i> @totalTech
+            </li>
+            <li>
+                <i>Engineers:</i> @totalEng
+            </li>
+            <li>
+                <i>Scientists:</i> @totalSci
+            </li>
+        </ul>
 
-</div>
-
+    </div>
 }
 
 @code {
@@ -156,12 +175,13 @@
 
     private void Search()
     {
-        // TODO: Add a warning to the user
+    // TODO: Add a warning to the user
         if (string.IsNullOrEmpty(buildingSearchString))
         {
             return;
         }
-        if (string.IsNullOrEmpty(market)) {
+        if (string.IsNullOrEmpty(market))
+        {
             return;
         }
 
@@ -172,13 +192,13 @@
         buildingSearchString = buildingSearchString.Replace(" ", "").ToUpper();
         buildingTickers = buildingSearchString.Split(",");
 
-        foreach (string ticker in buildingTickers)
+        foreach (var ticker in buildingTickers)
         {
             searchBuildings.Add(buildings.Where(x => x.Ticker.Equals(ticker,
-            StringComparison.InvariantCultureIgnoreCase)).First());
+                                                                     StringComparison.InvariantCultureIgnoreCase)).First());
         }
 
-        foreach (Building building in searchBuildings)
+        foreach (var building in searchBuildings)
         {
             totalAreaCost += building.AreaCost;
             totalPio += building.Pioneers;
@@ -187,9 +207,9 @@
             totalEng += building.Engineers;
             totalSci += building.Scientists;
 
-            // WHY IS THIS MODIFYING tempBuildingCosts
+    // WHY IS THIS MODIFYING tempBuildingCosts
             List<BuildingCost> tempBuildingCosts =
-            BuildingService.GetBuildingCostsByTicker(building.Ticker).ToList();
+                BuildingService.GetBuildingCostsByTicker(building.Ticker).ToList();
             if (buildingCosts is null)
             {
                 buildingCosts = tempBuildingCosts;
@@ -200,14 +220,14 @@
             }
         }
 
-        foreach (BuildingCost buildingCost in buildingCosts)
+        foreach (var buildingCost in buildingCosts)
         {
-            double matPrice = prices.Where(p => p.MaterialTicker == buildingCost.MaterialTicker && p.ExchangeCode ==
-            market).Select(p =>
-            p.PriceAverage).First()
-            ?? 0.0;
+            var matPrice = prices.Where(p => p.MaterialTicker == buildingCost.MaterialTicker && p.ExchangeCode ==
+                                             market).Select(p =>
+                                                                p.PriceAverage).First()
+                           ?? 0.0;
 
-            totalCost += (matPrice * buildingCost.Amount);
+            totalCost += matPrice * buildingCost.Amount;
         }
 
         CoalesceBuildingCosts();
@@ -234,27 +254,28 @@
 
     private void CoalesceBuildingCosts()
     {
-        foreach (BuildingCost bc in buildingCosts)
+        foreach (var bc in buildingCosts)
         {
-            // see if this loads the Materials
+    // see if this loads the Materials
             MaterialService.GetMaterialByTicker(bc.MaterialTicker);
         }
 
         List<Material> materials = buildingCosts.Select(x => x.Material).Distinct().ToList();
-        List<BuildingCost> outputBuildingCosts = new List<BuildingCost>();
+        var outputBuildingCosts = new List<BuildingCost>();
 
-        foreach (Material material in materials)
+        foreach (var material in materials)
         {
             IEnumerable<BuildingCost> tempBuildingCosts = buildingCosts.Where(x => x.Material.Equals(material));
 
             outputBuildingCosts.Add(
-            new BuildingCost
-            {
-                MaterialTicker = material.Ticker,
-                Amount = tempBuildingCosts.Sum(x => x.Amount)
-            });
+                new BuildingCost
+                {
+                    MaterialTicker = material.Ticker,
+                    Amount = tempBuildingCosts.Sum(x => x.Amount)
+                });
         }
 
         buildingCosts = outputBuildingCosts;
     }
+
 }

@@ -1,25 +1,21 @@
-@using System;
-@using System.Linq;
-@using NotAnotherBasePlanner.Data;
-
+@using NotAnotherBasePlanner.Data
 @if (recipeNode is not null)
 {
-
-
-    string title = string.Join(',', recipeNode.Recipe.Outputs);
+    var title = string.Join(',', recipeNode.Recipe.Outputs);
 
     <Collapsible Collapsed=true Title=@title>
-    <h5>Building: </h5>@recipeNode.Recipe.BuildingTicker
-    <h5>Recipe: </h5>@recipeNode.Recipe.RecipeName
-    <h5>Inputs:</h5>
-    @foreach (RecipeNode child in recipeNode.Children)
+        <h5>Building: </h5>@recipeNode.Recipe.BuildingTicker
+        <h5>Recipe: </h5>@recipeNode.Recipe.RecipeName
+        <h5>Inputs:</h5>
+        @foreach (var child in recipeNode.Children)
         {
-            <SupplyChain recipeNode=child depth=depth+1 />
+            <SupplyChain recipeNode=child depth=depth+1/>
         }
     </Collapsible>
 }
 
 @code {
+
     [Parameter]
     public RecipeNode recipeNode { get; set; }
 

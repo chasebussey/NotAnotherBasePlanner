@@ -1,8 +1,7 @@
 @page "/prices"
+@using NotAnotherBasePlanner.Data
 
 <PageTitle>Prices</PageTitle>
-
-@using NotAnotherBasePlanner.Data
 @inject PriceService PriceService
 
 <h1>Prices</h1>
@@ -11,12 +10,14 @@
 
 @if (prices == null)
 {
-    <p><em>Loading...</em></p>
+    <p>
+        <em>Loading...</em>
+    </p>
 }
 else
 {
     <table class="table">
-    <thead>
+        <thead>
         <tr>
             <th>Ticker</th>
             <th>Name</th>
@@ -24,18 +25,18 @@ else
             <th>MMSell</th>
             <th>Price Average</th>
         </tr>
-    </thead>
-    <tbody>
+        </thead>
+        <tbody>
         @foreach (var price in prices)
-            {
-                <tr>
-                    <td>@price.MaterialTicker</td>
-                    <td>@price.ExchangeCode</td>
-                    <td>@price.MarketMakerBuy</td>
-                    <td>@price.MarketMakerSell</td>
-                    <td>@price.PriceAverage</td>
-                </tr>
-            }
+        {
+            <tr>
+                <td>@price.MaterialTicker</td>
+                <td>@price.ExchangeCode</td>
+                <td>@price.MarketMakerBuy</td>
+                <td>@price.MarketMakerSell</td>
+                <td>@price.PriceAverage</td>
+            </tr>
+        }
         </tbody>
     </table>
 }
@@ -53,4 +54,5 @@ else
             prices = await PriceService.GetPricesAsync();
         }
     }
+
 }

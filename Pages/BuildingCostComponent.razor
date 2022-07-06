@@ -1,5 +1,4 @@
 @using NotAnotherBasePlanner.Data
-@using System.Collections.Specialized
 @inject BuildingService BuildingService
 @inject PriceService PriceService
 <h5>Construction Costs:</h5>
@@ -9,7 +8,7 @@
         <thead>
         <tr>
             <th></th>
-            @foreach (BuildingCost bc in BuildingCosts)
+            @foreach (var bc in BuildingCosts)
             {
                 <th>@bc.MaterialTicker</th>
             }
@@ -17,31 +16,38 @@
         </thead>
         <tbody>
         <tr>
-            <td><b>Amount:</b></td>
-            @foreach (BuildingCost bc in BuildingCosts)
+            <td>
+                <b>Amount:</b>
+            </td>
+            @foreach (var bc in BuildingCosts)
             {
                 <td>@bc.Amount</td>
             }
         </tr>
         <tr>
-            <td><b>Avg. Price:</b></td>
-            @foreach (BuildingCost bc in BuildingCosts)
+            <td>
+                <b>Avg. Price:</b>
+            </td>
+            @foreach (var bc in BuildingCosts)
             {
                 <td>
                     @(Prices.Where(x => x.MaterialTicker == bc.MaterialTicker && x.ExchangeCode == Market)
-                        .Select(x => x.PriceAverage).First() ?? 0.00)
+                            .Select(x => x.PriceAverage).First() ?? 0.00)
                 </td>
             }
         </tr>
         </tbody>
     </table>
 }
+
 @code {
+
     [Parameter]
     public BaseBuilding? BaseBuilding { get; set; }
+
     [Parameter]
     public Planet? Planet { get; set; }
-    
+
     private Price[] Prices { get; set; }
     private List<BuildingCost> BuildingCosts { get; set; }
 
@@ -62,8 +68,8 @@
 
     private void AddConditionalBuildingCosts()
     {
-        List<BuildingCost> conditionalBuildingCosts = new List<BuildingCost>();
-        // Surface material
+        var conditionalBuildingCosts = new List<BuildingCost>();
+    // Surface material
         if (Planet is {Surface: true })
         {
             conditionalBuildingCosts.Add(new BuildingCost
@@ -81,52 +87,53 @@
             });
         }
 
-        // Gravity materials
+    // Gravity materials
         var gravityCost = Planet switch {
-            { Gravity: < 0.25 } => new BuildingCost
-            {
-                MaterialTicker = "MGC", Amount = 1
-            },
-            { Gravity: > 2.5 } => new BuildingCost
-            {
-                MaterialTicker = "BL", Amount = 1
-            },
+        { Gravity: < 0.25 } => new BuildingCost
+        {
+            MaterialTicker = "MGC", Amount = 1
+        },
+        { Gravity: > 2.5 } => new BuildingCost
+        {
+            MaterialTicker = "BL", Amount = 1
+        },
             _ => null
-        };
+            };
 
         if (gravityCost != null) conditionalBuildingCosts.Add(gravityCost);
 
     // Temperature materials
         var temperatureCost = Planet switch {
-            { Temperature: < -25 } => new BuildingCost
-            {
-                MaterialTicker = "INS", Amount = BaseBuilding.Building.AreaCost * 10
-            },
-            { Temperature: > 75 } => new BuildingCost
-            {
-                MaterialTicker = "TSH", Amount = 1
-            },
+        { Temperature: < -25 } => new BuildingCost
+        {
+            MaterialTicker = "INS", Amount = BaseBuilding.Building.AreaCost * 10
+        },
+        { Temperature: > 75 } => new BuildingCost
+        {
+            MaterialTicker = "TSH", Amount = 1
+        },
             _ => null
-        };
+            };
 
         if (temperatureCost != null) conditionalBuildingCosts.Add(temperatureCost);
 
     // Pressure materials
         var pressureCost = Planet switch{
-            { Pressure: < 0.25 } => new BuildingCost
-            {
-                MaterialTicker = "SEA", Amount = 1
-            },
-            { Pressure: > 2.0 } => new BuildingCost
-            {
-                MaterialTicker = "HSE", Amount = 1
-            },
+        { Pressure: < 0.25 } => new BuildingCost
+        {
+            MaterialTicker = "SEA", Amount = 1
+        },
+        { Pressure: > 2.0 } => new BuildingCost
+        {
+            MaterialTicker = "HSE", Amount = 1
+        },
             _ => null
-        };
+            };
 
         if (pressureCost != null) conditionalBuildingCosts.Add(pressureCost);
 
         BuildingCosts.AddRange(conditionalBuildingCosts);
         StateHasChanged();
     }
+
 }

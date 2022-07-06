@@ -1,8 +1,7 @@
 @page "/recipe"
+@using NotAnotherBasePlanner.Data
 
 <PageTitle>Recipes</PageTitle>
-
-@using NotAnotherBasePlanner.Data
 @inject RecipeService RecipeService
 
 <h1>Recipes</h1>
@@ -11,29 +10,31 @@
 
 @if (recipes == null)
 {
-    <p><em>Loading...</em></p>
+    <p>
+        <em>Loading...</em>
+    </p>
 }
 else
 {
     <table class="table">
-    <thead>
+        <thead>
         <tr>
             <th>Recipe Name</th>
             <th>Building</th>
             <th>Inputs</th>
             <th>Outputs</th>
         </tr>
-    </thead>
-    <tbody>
+        </thead>
+        <tbody>
         @foreach (var recipe in recipes)
-            {
-                <tr>
-                    <td>@recipe.RecipeName</td>
-                    <td>@recipe.BuildingTicker</td>
-                    <td>@string.Join(',',recipe.Inputs)</td>
-                    <td>@string.Join(',',recipe.Outputs)</td>
-                </tr>
-            }
+        {
+            <tr>
+                <td>@recipe.RecipeName</td>
+                <td>@recipe.BuildingTicker</td>
+                <td>@string.Join(',', recipe.Inputs)</td>
+                <td>@string.Join(',', recipe.Outputs)</td>
+            </tr>
+        }
         </tbody>
     </table>
 }
@@ -51,4 +52,5 @@ else
             recipes = await RecipeService.GetRecipesAsync();
         }
     }
+
 }

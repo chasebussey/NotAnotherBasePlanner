@@ -4,11 +4,11 @@
     background-color: white;
     overflow: hidden;
 }
- 
+
 .collapsible .title {
     display: table-cell
 }
- 
+
 .collapsible .value {
     display: table-cell;
     text-align: right;
