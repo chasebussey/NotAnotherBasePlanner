@@ -91,7 +91,7 @@ else
         {
             BuildingCosts = new List<BuildingCost>();
             BuildingService.LoadBuildingCosts(BaseBuilding.Building);
-            BuildingCosts = BaseBuilding.Building.BuildingCosts;
+            BuildingCosts = new List<BuildingCost>(BaseBuilding.Building.BuildingCosts);
             AddConditionalBuildingCosts();
         }
     }

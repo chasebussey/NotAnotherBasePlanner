@@ -7,7 +7,7 @@
 @inject ApplicationUserManager UserManager
 <h3>New Base: @PlanetFullDesignation</h3>
 <div style="display: flex">
-        <div class="" style="border: thin solid #2c3034;float: left">
+        <div class="" style="border: thin solid #2c3034;float: left; margin: 10px 10px 10px 0; padding: 5px">
             <h5>Planet Info:</h5>
             Surface: @PlanetSurface<br/>
             Gravity: @PlanetGravity<br/>
@@ -21,7 +21,7 @@
             }
         </div>
 
-        <div class="" style="border: thin solid #2c3034;flex-grow: 4">
+        <div class="" style="border: thin solid #2c3034;flex-grow: 4; margin: 10px 10px 10px 0; padding: 5px">
             <h5>Buildings:</h5>
 
             @if (basePlan.Buildings != null && basePlan.Buildings.Count > 0)
@@ -58,10 +58,10 @@
                 </form>
             }
         </div>
-        <div style="border: thin solid #2c3034;">
+        <div style="border: thin solid #2c3034; margin: 10px 10px 10px 0; padding: 5px">
             <h5>Inputs:</h5>
         </div>
-        <div style="border: thin solid #2c3034">
+        <div style="border: thin solid #2c3034; margin: 10px 0; padding: 5px">
             <h5>Outputs:</h5>
         </div>
     </div>

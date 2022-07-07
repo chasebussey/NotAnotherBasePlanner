@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace NotAnotherBasePlanner.Data;
 
 public class BaseService
@@ -13,5 +15,11 @@ public class BaseService
 	{
 		DbContext.Bases.Add(b);
 		await DbContext.SaveChangesAsync();
+	}
+
+	public async Task<List<Base>> GetBasesByUserIdAsync(string userId)
+	{
+		return await DbContext.Bases.Where(x => x.ApplicationUserId.Equals(userId))
+		                      .Include(x => x.Planet).ToListAsync();
 	}
 }
