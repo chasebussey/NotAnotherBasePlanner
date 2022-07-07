@@ -1,0 +1,22 @@
+@page "/Base/{id}"
+@using NotAnotherBasePlanner.Data
+@inject BaseService BaseService
+
+<BaseDesigner planet="@BasePlan.Planet" basePlan="@BasePlan" Create="false"></BaseDesigner>
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+    
+    private Data.Base BasePlan { get; set; }
+    private string PlanetFullDesignation { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        BasePlan = BaseService.GetBaseByBaseId(Id);
+        
+        PlanetFullDesignation = !string.IsNullOrEmpty(BasePlan.Planet.DisplayName) ? $"{BasePlan.Planet.Designation} | {BasePlan.Planet.DisplayName}" : BasePlan.Planet.Designation;
+    }
+
+}

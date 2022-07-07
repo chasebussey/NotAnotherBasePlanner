@@ -56,6 +56,16 @@ public class PlannerContext : IdentityDbContext<ApplicationUser>
 		modelBuilder.Entity<BuildingCost>()
 		            .HasKey(e => new { e.BuildingTicker, e.MaterialTicker });
 
+		modelBuilder.Entity<Base>()
+		            .Navigation(e => e.Planet)
+		            .AutoInclude();
+		modelBuilder.Entity<Base>()
+		            .Navigation(e => e.Buildings)
+		            .AutoInclude();
+		modelBuilder.Entity<BaseBuilding>()
+		            .Navigation(e => e.Building)
+		            .AutoInclude();
+
 		foreach (var entityType in modelBuilder.Model.GetEntityTypes())
 			entityType.SetTableName(entityType.DisplayName());
 	}

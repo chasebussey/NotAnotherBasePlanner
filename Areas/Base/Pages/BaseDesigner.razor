@@ -1,11 +1,12 @@
 @using NotAnotherBasePlanner.Data
 @using NotAnotherBasePlanner.Pages
+@using Microsoft.CodeAnalysis
 @inject PlanetService PlanetService
 @inject BuildingService BuildingService
 @inject BaseService BaseService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject ApplicationUserManager UserManager
-<h3>New Base: @PlanetFullDesignation</h3>
+<h3>Base: @PlanetFullDesignation</h3>
 <div style="display: flex">
         <div class="" style="border: thin solid #2c3034;float: left; margin: 10px 10px 10px 0; padding: 5px">
             <h5>Planet Info:</h5>
@@ -69,8 +70,10 @@
 
     [Parameter]
     public Planet planet { get; set; }
-
-    public Base basePlan { get; set; }
+    [Parameter]
+    public Data.Base basePlan { get; set; }
+    [Parameter]
+    public bool Create { get; set; }
     public string buildingTicker { get; set; }
     public bool addBuilding { get; set; }
 
@@ -103,9 +106,13 @@
     {
         base.OnInitialized();
         planet = PlanetService.LoadPlanetResources(planet);
-        basePlan = new Base();
-        basePlan.Buildings = new List<BaseBuilding>();
-        AddBuilding("CM");
+        if (basePlan is null)
+        {
+            basePlan = new Data.Base();
+            basePlan.Buildings = new List<BaseBuilding>();
+            AddBuilding("CM");
+        }
+        
     }
 
     public async void AddBuilding(string buildingTicker)
@@ -153,6 +160,13 @@
         var userId = await UserManager.GetUserIdAsync(user);
         basePlan.ApplicationUserId = userId;
         basePlan.Planet = planet;
-        BaseService.AddBaseAsync(basePlan);
+        if (Create)
+        {
+            BaseService.AddBaseAsync(basePlan);
+        }
+        else
+        {
+            BaseService.UpdateBaseAsync(basePlan);
+        }
     }
 }

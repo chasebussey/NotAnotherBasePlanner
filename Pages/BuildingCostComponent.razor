@@ -83,10 +83,10 @@ else
 
     private string Market => string.IsNullOrEmpty(Planet.FactionCode) ? "NC1" : $"{Planet.FactionCode}1";
 
-    protected override async void OnInitialized()
+    protected override void OnInitialized()
     {
         base.OnInitialized();
-        Prices = await PriceService.GetPricesAsync();
+        Prices = PriceService.GetPrices();
         if (BaseBuilding is not null)
         {
             BuildingCosts = new List<BuildingCost>();

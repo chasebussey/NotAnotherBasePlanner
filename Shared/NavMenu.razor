@@ -69,6 +69,14 @@
                     </div>
                 }
             }
+            @if (ShowBases)
+            {
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Base/New">
+                        <span class="oi oi-plus" aria-hidden="true"></span>New Base
+                    </NavLink>
+                </div>
+            }
         </AuthorizeView>
     </nav>
 </div>
@@ -96,8 +104,12 @@
         StateHasChanged();
     }
 
-    private void ToggleBases()
+    private async void ToggleBases()
     {
         ShowBases = !ShowBases;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var userId = await UserManager.GetUserIdAsync(authState.User.Identity.Name);
+        Bases = await BaseService.GetBasesByUserIdAsync(userId);
+        StateHasChanged();
     }
 }

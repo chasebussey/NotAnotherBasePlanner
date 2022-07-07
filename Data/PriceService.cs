@@ -35,6 +35,11 @@ public class PriceService
 		return await DbContext.Prices.ToArrayAsync();
 	}
 
+	public Price[] GetPrices()
+	{
+		return DbContext.Prices.ToArray();
+	}
+
 	public async Task<Price[]> GetPricesByTickerAsync(string materialTicker)
 	{
 		return await DbContext.Prices.Where(x =>

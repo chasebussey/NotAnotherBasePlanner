@@ -1,4 +1,4 @@
-@page "/Base"
+@page "/Base/New"
 @using NotAnotherBasePlanner.Data
 @inject PlanetService _planetService
 <AuthorizeView>
@@ -34,7 +34,7 @@
         }
         else
         {
-            <BaseDesigner planet="@selectedPlanet"/>
+            <BaseDesigner planet="@selectedPlanet" Create="true"/>
         }
     </Authorized>
     <NotAuthorized>
