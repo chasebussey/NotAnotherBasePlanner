@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NotAnotherBasePlanner.Data;
 
@@ -11,9 +12,10 @@ using NotAnotherBasePlanner.Data;
 namespace NotAnotherBasePlanner.Migrations
 {
     [DbContext(typeof(PlannerContext))]
-    partial class PlannerContextModelSnapshot : ModelSnapshot
+    [Migration("20220707003142_JustChecking")]
+    partial class JustChecking
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -227,47 +229,47 @@ namespace NotAnotherBasePlanner.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("AgricultureExperts")
+                    b.Property<int>("AgricultureExperts")
                         .HasColumnType("int");
 
                     b.Property<string>("ApplicationUserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("AvailableArea")
+                    b.Property<int>("AvailableArea")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ChemistryExperts")
+                    b.Property<int>("ChemistryExperts")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ConstructionExperts")
+                    b.Property<int>("ConstructionExperts")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ElectronicsExperts")
+                    b.Property<int>("ElectronicsExperts")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ExtractionExperts")
+                    b.Property<int>("ExtractionExperts")
                         .HasColumnType("int");
 
-                    b.Property<int?>("FoodExperts")
+                    b.Property<int>("FoodExperts")
                         .HasColumnType("int");
 
-                    b.Property<int?>("FuelExperts")
+                    b.Property<int>("FuelExperts")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ManufacturingExperts")
+                    b.Property<int>("ManufacturingExperts")
                         .HasColumnType("int");
 
-                    b.Property<int?>("MetallurgyExperts")
+                    b.Property<int>("MetallurgyExperts")
                         .HasColumnType("int");
 
-                    b.Property<int?>("Permits")
+                    b.Property<int>("Permits")
                         .HasColumnType("int");
 
                     b.Property<Guid>("PlanetId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("UsedArea")
+                    b.Property<int>("UsedArea")
                         .HasColumnType("int");
 
                     b.HasKey("Id");

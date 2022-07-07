@@ -26,4 +26,10 @@ public class ApplicationUserManager : UserManager<ApplicationUser>
 
 		return result;
 	}
+
+	public async Task<string> GetUserIdAsync(string username)
+	{
+		ApplicationUser user = await Store.FindByNameAsync(username, new CancellationToken());
+		return user.Id;
+	}
 }

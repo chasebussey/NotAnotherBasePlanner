@@ -1,55 +1,85 @@
 @using NotAnotherBasePlanner.Data
 @inject BuildingService BuildingService
 @inject PriceService PriceService
-<h5>Construction Costs:</h5>
-@if (BuildingCosts is not null && BuildingCosts.Count > 0)
+
+@if (!Visible)
 {
-    <table class="table">
-        <thead>
-        <tr>
-            <th></th>
-            @foreach (var bc in BuildingCosts)
-            {
-                <th>@bc.MaterialTicker</th>
-            }
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>
-                <b>Amount:</b>
-            </td>
-            @foreach (var bc in BuildingCosts)
-            {
-                <td>@bc.Amount</td>
-            }
-        </tr>
-        <tr>
-            <td>
-                <b>Avg. Price:</b>
-            </td>
-            @foreach (var bc in BuildingCosts)
-            {
-                <td>
-                    @(Prices.Where(x => x.MaterialTicker == bc.MaterialTicker && x.ExchangeCode == Market)
-                            .Select(x => x.PriceAverage).First() ?? 0.00)
-                </td>
-            }
-        </tr>
-        </tbody>
-    </table>
+    <a class="link-secondary" @onclick="ToggleVisibility">Show Costs</a>
 }
-
+else
+{
+    <h7>Construction Costs:</h7>
+    if (BuildingCosts is not null && BuildingCosts.Count > 0)
+    {
+        <table class="table table-secondary">
+            <thead>
+            <tr>
+                <th></th>
+                @foreach (var bc in BuildingCosts)
+                {
+                    <th>@bc.MaterialTicker</th>
+                }
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    <b>Amount:</b>
+                </td>
+                @foreach (var bc in BuildingCosts)
+                {
+                    <td>@bc.Amount</td>
+                }
+            </tr>
+            <tr>
+                <td>
+                    <b>Avg. Price:</b>
+                </td>
+                @foreach (var bc in BuildingCosts)
+                {
+                    var price = (Prices.Where(x => x.MaterialTicker == bc.MaterialTicker && x.ExchangeCode == Market)
+                                       .Select(x => x.PriceAverage).First() ?? 0.00);
+                    <td>
+                        @price.ToString("F2") @CurrencyCode
+                    </td>
+                    BuildingCostTotal += price * bc.Amount;
+                }
+            </tr>
+            <tr>
+                <td><b>Total: </b></td>
+                <td>@BuildingCostTotal.ToString("F2") @CurrencyCode</td>
+            </tr>
+            </tbody>
+        </table>
+        <a class="link-secondary" @onclick="ToggleVisibility">Hide Costs</a>
+    }
+}
 @code {
-
     [Parameter]
     public BaseBuilding? BaseBuilding { get; set; }
-
     [Parameter]
     public Planet? Planet { get; set; }
 
     private Price[] Prices { get; set; }
     private List<BuildingCost> BuildingCosts { get; set; }
+    private bool Visible { get; set; }
+    private double BuildingCostTotal { get; set; }
+
+    private string CurrencyCode
+    {
+        get
+        {
+            if (Planet != null)
+                return Planet.FactionCode switch{
+                    "NC" => "NCC",
+                    "CI" => "CIS",
+                    "IC" => "ICA",
+                    "AI" => "AIS",
+                    _    => "NCC"
+                    };
+            return "NCC";
+        }
+    }
 
     private string Market => string.IsNullOrEmpty(Planet.FactionCode) ? "NC1" : $"{Planet.FactionCode}1";
 
@@ -69,7 +99,7 @@
     private void AddConditionalBuildingCosts()
     {
         var conditionalBuildingCosts = new List<BuildingCost>();
-    // Surface material
+        // Surface material
         if (Planet is {Surface: true })
         {
             conditionalBuildingCosts.Add(new BuildingCost
@@ -87,7 +117,7 @@
             });
         }
 
-    // Gravity materials
+        // Gravity materials
         var gravityCost = Planet switch {
         { Gravity: < 0.25 } => new BuildingCost
         {
@@ -102,7 +132,7 @@
 
         if (gravityCost != null) conditionalBuildingCosts.Add(gravityCost);
 
-    // Temperature materials
+        // Temperature materials
         var temperatureCost = Planet switch {
         { Temperature: < -25 } => new BuildingCost
         {
@@ -117,7 +147,7 @@
 
         if (temperatureCost != null) conditionalBuildingCosts.Add(temperatureCost);
 
-    // Pressure materials
+        // Pressure materials
         var pressureCost = Planet switch{
         { Pressure: < 0.25 } => new BuildingCost
         {
@@ -136,4 +166,8 @@
         StateHasChanged();
     }
 
+    private void ToggleVisibility()
+    {
+        Visible = !Visible;
+    }
 }

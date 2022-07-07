@@ -2,71 +2,69 @@
 @using NotAnotherBasePlanner.Pages
 @inject PlanetService PlanetService
 @inject BuildingService BuildingService
+@inject BaseService BaseService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ApplicationUserManager UserManager
 <h3>New Base: @PlanetFullDesignation</h3>
-
 <div style="display: flex">
-    <div class="" style="border: thin solid #2c3034;float: left">
-        <h5>Planet Info:</h5>
-        Surface: @PlanetSurface<br/>
-        Gravity: @PlanetGravity<br/>
-        Temperature: @PlanetTemperature<br/>
-        Pressure: @PlanetPressure
-        <hr/>
-        @foreach (var res in planet.Resources)
-        {
-            <text>@res.MaterialTicker | @res.Type | @res.Concentration.ToString("F2")</text>
-            <br/>
-        }
-    </div>
+        <div class="" style="border: thin solid #2c3034;float: left">
+            <h5>Planet Info:</h5>
+            Surface: @PlanetSurface<br/>
+            Gravity: @PlanetGravity<br/>
+            Temperature: @PlanetTemperature<br/>
+            Pressure: @PlanetPressure
+            <hr/>
+            @foreach (var res in planet.Resources)
+            {
+                <text>@res.MaterialTicker | @res.Type | @res.Concentration.ToString("F2")</text>
+                <br/>
+            }
+        </div>
 
-    <div class="" style="border: thin solid #2c3034;flex-grow: 4">
-        <h5>Buildings:</h5>
+        <div class="" style="border: thin solid #2c3034;flex-grow: 4">
+            <h5>Buildings:</h5>
 
-        @if (basePlan.Buildings != null && basePlan.Buildings.Count > 0)
-        {
-            <table class="table">
-                <tr>
-                    <th>Ticker</th>
-                    <th>Recipe</th>
-                    <th>Constructed?</th>
-                    <th>Efficiency</th>
-                    <th>Actions</th>
-                </tr>
-                @foreach (var building in basePlan.Buildings)
-                {
+            @if (basePlan.Buildings != null && basePlan.Buildings.Count > 0)
+            {
+                <table class="table">
                     <tr>
-                        <td>@building.BuildingTicker</td>
-                        <td>@building.Recipe</td>
-                        <td>@building.Constructed</td>
-                        <td>@building.Efficiency</td>
-                        <td>
-                            <button type="button" @onclick="SetShowCosts">Show Costs</button> <button type="button" @onclick="() => MarkConstructed(building)">Construct</button>
-                        </td>
+                        <th>Ticker</th>
+                        <th>Recipe</th>
+                        <th>Constructed?</th>
+                        <th>Efficiency</th>
                     </tr>
-                    <BuildingCostComponent BaseBuilding="@building" planet="@planet"/>
-                }
-            </table>
-        }
-        @if (!addBuilding)
-        {
-            <button class="btn btn-primary" type="button" @onclick="DisplayAddBuildingForm">Add Building</button>
-        }
-        else
-        {
-            <form @onsubmit="() => AddBuilding(buildingTicker)">
-                <input type="text" @bind="buildingTicker"/>
-                <button>Add</button>
-            </form>
-        }
+                    @foreach (var building in basePlan.Buildings)
+                    {
+                        <tr>
+                            <td>@building.BuildingTicker</td>
+                            <td>@building.Recipe</td>
+                            <td>@building.Constructed</td>
+                            <td>@building.Efficiency</td>
+                        </tr>
+                        <BuildingCostComponent BaseBuilding="@building" planet="@planet"/>
+                    }
+                </table>
+            }
+            @if (!addBuilding)
+            {
+                <button class="btn btn-primary" type="button" @onclick="DisplayAddBuildingForm">Add Building</button>
+                <button class="btn btn-outline-primary" @onclick="SaveBase">Save</button>
+            }
+            else
+            {
+                <form @onsubmit="() => AddBuilding(buildingTicker)">
+                    <input type="text" @bind="buildingTicker"/>
+                    <button>Add</button>
+                </form>
+            }
+        </div>
+        <div style="border: thin solid #2c3034;">
+            <h5>Inputs:</h5>
+        </div>
+        <div style="border: thin solid #2c3034">
+            <h5>Outputs:</h5>
+        </div>
     </div>
-    <div style="border: thin solid #2c3034;">
-        <h5>Inputs:</h5>
-    </div>
-    <div style="border: thin solid #2c3034">
-        <h5>Outputs:</h5>
-    </div>
-</div>
-
 @code {
 
     [Parameter]
@@ -146,4 +144,15 @@
     {
     }
 
+    public async void SaveBase()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity == null) return;
+        var user = authState.User.Identity.Name;
+
+        var userId = await UserManager.GetUserIdAsync(user);
+        basePlan.ApplicationUserId = userId;
+        basePlan.Planet = planet;
+        BaseService.AddBaseAsync(basePlan);
+    }
 }

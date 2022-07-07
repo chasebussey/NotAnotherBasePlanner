@@ -1,41 +1,46 @@
 @page "/Base"
 @using NotAnotherBasePlanner.Data
 @inject PlanetService _planetService
+<AuthorizeView>
+    <Authorized>
+        @if (selectedPlanet == null)
+        {
+            <h3>New Base</h3>
+            <h4>Select a planet:</h4>
 
-@if (selectedPlanet == null)
-{
-    <h3>New Base</h3>
-    <h4>Select a planet:</h4>
+            <form @onsubmit="SearchPlanets">
+                <input type="text" @bind="planetSearchString" placeholder="Planet designation or display name"/>
+                <button type="submit">Search</button>
+            </form>
 
-    <form @onsubmit="SearchPlanets">
-        <input type="text" @bind="planetSearchString" placeholder="Planet designation or display name"/>
-        <button type="submit">Search</button>
-    </form>
-
-    if (planets == null || planets.Length == 0)
-    {
-        <p>No planets found</p>
-    }
-    else
-    {
-        <table>
-            @foreach (var planet in planets)
+            if (planets == null || planets.Length == 0)
             {
-                <tr>
-                    <td>@planet.Designation | @planet.DisplayName</td>
-                    <td>
-                        <button @onclick="@(() => SelectPlanet(planet))">Select</button>
-                    </td>
-                </tr>
+                <p>No planets found</p>
             }
-        </table>
-    }
-}
-else
-{
-    <BaseDesigner planet="@selectedPlanet"/>
-}
-
+            else
+            {
+                <table>
+                    @foreach (var planet in planets)
+                    {
+                        <tr>
+                            <td>@planet.Designation | @planet.DisplayName</td>
+                            <td>
+                                <button @onclick="@(() => SelectPlanet(planet))">Select</button>
+                            </td>
+                        </tr>
+                    }
+                </table>
+            }
+        }
+        else
+        {
+            <BaseDesigner planet="@selectedPlanet"/>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <NavLink href="Identity/Account/Login" class="nav-link">Login</NavLink>
+    </NotAuthorized>
+</AuthorizeView>
 @code {
     public string? planetSearchString { get; set; }
     public Planet? selectedPlanet { get; set; }
