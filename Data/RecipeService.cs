@@ -52,9 +52,8 @@ public class RecipeService
 
 	public async Task<Recipe[]> GetRecipesByBuildingAsync(string buildingTicker)
 	{
-		return await DbContext.Recipes.Where(x =>
-			                                     x.BuildingTicker.Equals(
-				                                     buildingTicker, StringComparison.InvariantCultureIgnoreCase))
+		return await DbContext.Recipes.Where(x => 
+			                                     x.BuildingTicker.Equals(buildingTicker, StringComparison.InvariantCultureIgnoreCase))
 		                      .ToArrayAsync();
 	}
 }

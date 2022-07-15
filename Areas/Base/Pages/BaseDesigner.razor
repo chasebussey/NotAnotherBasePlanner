@@ -6,66 +6,82 @@
 @inject BaseService BaseService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject ApplicationUserManager UserManager
+
+<style>
+    .card-group > .card {
+        flex-basis: auto;
+    }
+</style>
 <h3>Base: @PlanetFullDesignation</h3>
-<div style="display: flex">
-        <div class="" style="border: thin solid #2c3034;float: left; margin: 10px 10px 10px 0; padding: 5px">
-            <h5>Planet Info:</h5>
-            Surface: @PlanetSurface<br/>
-            Gravity: @PlanetGravity<br/>
-            Temperature: @PlanetTemperature<br/>
-            Pressure: @PlanetPressure
+
+<div class="row">
+    <div class="card col-sm-12 col-md-2">
+        <div class="card-body">
+            <h5 class="card-title">Planet Info</h5>
             <hr/>
-            @foreach (var res in planet.Resources)
+            <h6 class="card-subtitle">Characteristics</h6>
+            <span style="display: inline-block; min-width: 6.25em">Surface:</span> @PlanetSurface <br/>
+            <span style="display: inline-block; min-width: 6.25em">Gravity:</span> @PlanetGravity <br/>
+            <span style="display: inline-block; min-width: 6.25em">Temperature:</span> @PlanetTemperature <br/>
+            <span style="display: inline-block; min-width: 6.25em">Pressure:</span > @PlanetPressure
+            <hr/>
+            <h6 class="card-subtitle">Resources</h6>
+            @foreach (Resource res in planet.Resources)
             {
-                <text>@res.MaterialTicker | @res.Type | @res.Concentration.ToString("F2")</text>
-                <br/>
+                <text><span style="display: inline-block; min-width: 2em">@res.MaterialTicker</span> | <span style="display: inline-block; min-width: 5em">@res.Type</span> | @res.Concentration.ToString("F2")%<br/></text>
             }
-        </div>
-
-        <div class="" style="border: thin solid #2c3034;flex-grow: 4; margin: 10px 10px 10px 0; padding: 5px">
-            <h5>Buildings:</h5>
-
-            @if (basePlan.Buildings != null && basePlan.Buildings.Count > 0)
-            {
-                <table class="table">
-                    <tr>
-                        <th>Ticker</th>
-                        <th>Recipe</th>
-                        <th>Constructed?</th>
-                        <th>Efficiency</th>
-                    </tr>
-                    @foreach (var building in basePlan.Buildings)
-                    {
-                        <tr>
-                            <td>@building.BuildingTicker</td>
-                            <td>@building.Recipe</td>
-                            <td>@building.Constructed</td>
-                            <td>@building.Efficiency</td>
-                        </tr>
-                        <BuildingCostComponent BaseBuilding="@building" planet="@planet"/>
-                    }
-                </table>
-            }
-            @if (!addBuilding)
-            {
-                <button class="btn btn-primary" type="button" @onclick="DisplayAddBuildingForm">Add Building</button>
-                <button class="btn btn-outline-primary" @onclick="SaveBase">Save</button>
-            }
-            else
-            {
-                <form @onsubmit="() => AddBuilding(buildingTicker)">
-                    <input type="text" @bind="buildingTicker"/>
-                    <button>Add</button>
-                </form>
-            }
-        </div>
-        <div style="border: thin solid #2c3034; margin: 10px 10px 10px 0; padding: 5px">
-            <h5>Inputs:</h5>
-        </div>
-        <div style="border: thin solid #2c3034; margin: 10px 0; padding: 5px">
-            <h5>Outputs:</h5>
         </div>
     </div>
+    <div class="card col-sm-12 col-md-6 gx-0">
+        <div class="card-body">
+            <h5 class="card-title">Buildings</h5>
+            <hr/>
+            <div class="card-group">
+                @foreach (BaseBuilding building in basePlan.Buildings)
+                {
+                    <div class="card col-4 flex-shrink-0 flex-grow-0 border">
+                        <div class="card-body"><h6 class="card-title">@building.BuildingTicker | @building.Building.Name</h6>
+                            <hr/>
+                            Constructed? <input class="form-check-input" type="checkbox" @bind="@building.Constructed"></input> <br/>
+                            Efficiency: @building.Efficiency <br/>
+                            Recipe(s): <br/>
+                            <select class="form-select d-flex">
+                                @foreach (Recipe recipe in building.Building.Recipes)
+                                {
+                                    @foreach (string mat in recipe.Outputs)
+                                    {
+                                        <option>@mat</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="card-footer">
+                            <BuildingCostComponent BaseBuilding="@building" Planet="@planet"></BuildingCostComponent>
+                            <button type="button" class="btn btn-outline-danger" @onclick="() => DeleteBuilding(building)">Delete</button>
+                        </div>
+                    </div>
+                }
+                @if (addBuilding)
+                {
+                    <div class="card col-4 flex-shrink-0 border p-2">
+                        <form @onsubmit="() => AddBuilding(buildingTicker)">
+                            <input type="text" class="form-text" @bind="buildingTicker"></input><br/>
+                            <button type="submit">Add</button>
+                            <button type="button" @onclick="HideAddBuildingForm">Cancel</button>
+                        </form>
+                    </div>
+                }
+                
+            </div>
+        </div>
+        <div class="card-footer">
+            <button class="btn btn-primary" @onclick="SaveBase">Save</button>
+            <button class="btn btn-outline-primary" @onclick="DisplayAddBuildingForm">Add Building</button>
+        </div>
+    </div>
+</div>
+
+
 @code {
 
     [Parameter]
@@ -168,5 +184,10 @@
         {
             BaseService.UpdateBaseAsync(basePlan);
         }
+    }
+
+    public void DeleteBuilding(BaseBuilding building)
+    {
+        basePlan.Buildings.Remove(building);
     }
 }

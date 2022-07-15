@@ -15,4 +15,5 @@ public class Building
 	public int Scientists { get; set; }
 	public int AreaCost { get; set; }
 	public List<BuildingCost> BuildingCosts { get; set; }
+	public List<Recipe> Recipes { get; set; }
 }

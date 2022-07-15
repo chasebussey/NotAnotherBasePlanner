@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
 namespace NotAnotherBasePlanner.Data;
 
@@ -20,6 +21,8 @@ public class PlannerContext : IdentityDbContext<ApplicationUser>
 	public DbSet<Planet> Planets { get; set; }
 	public DbSet<Resource> Resources { get; set; }
 	public DbSet<UserPrice> UserPrices { get; set; }
+
+	public DbSet<BaseBuildingRecipe> BaseBuildingRecipes { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -64,6 +67,19 @@ public class PlannerContext : IdentityDbContext<ApplicationUser>
 		            .AutoInclude();
 		modelBuilder.Entity<BaseBuilding>()
 		            .Navigation(e => e.Building)
+		            .AutoInclude();
+
+		modelBuilder.Entity<BaseBuilding>()
+		            .HasMany(e => e.Recipes)
+		            .WithOne(e => e.Building)
+		            .HasForeignKey(e => e.BaseBuildingId);
+		
+		
+		// modelBuilder.Entity<BaseBuildingRecipe>().HasOne(e => e.Building).WithOne().OnDelete(DeleteBehavior.NoAction);
+		// modelBuilder.Entity<BaseBuildingRecipe>().HasOne(e => e.Recipe).WithOne().OnDelete(DeleteBehavior.NoAction);
+
+		modelBuilder.Entity<Building>()
+		            .Navigation(e => e.Recipes)
 		            .AutoInclude();
 
 		foreach (var entityType in modelBuilder.Model.GetEntityTypes())
