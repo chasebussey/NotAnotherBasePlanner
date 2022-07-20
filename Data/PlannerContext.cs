@@ -68,6 +68,12 @@ public class PlannerContext : IdentityDbContext<ApplicationUser>
 		modelBuilder.Entity<BaseBuilding>()
 		            .Navigation(e => e.Building)
 		            .AutoInclude();
+		modelBuilder.Entity<BaseBuilding>()
+		            .Navigation(e => e.Recipes)
+		            .AutoInclude();
+		modelBuilder.Entity<BaseBuildingRecipe>()
+		            .Navigation(e => e.Recipe)
+		            .AutoInclude();
 
 		modelBuilder.Entity<BaseBuilding>()
 		            .HasMany(e => e.Recipes)

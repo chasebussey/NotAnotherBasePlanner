@@ -23,6 +23,7 @@ builder.Services.AddScoped<BuildingService>();
 builder.Services.AddScoped<RecipeService>();
 builder.Services.AddScoped<PriceService>();
 builder.Services.AddScoped<BaseService>();
+builder.Services.AddScoped<BaseBuildingService>();
 builder.Services.AddScoped<MaterialRecipeService>();
 builder.Services.AddScoped(ps =>
 {

@@ -9,18 +9,18 @@ public class Base
 	public string ApplicationUserId { get; set; }
 
 	public List<BaseBuilding> Buildings { get; set; }
-	public int? AgricultureExperts { get; set; }
-	public int? ChemistryExperts { get; set; }
-	public int? ConstructionExperts { get; set; }
-	public int? ElectronicsExperts { get; set; }
-	public int? FoodExperts { get; set; }
-	public int? FuelExperts { get; set; }
-	public int? ManufacturingExperts { get; set; }
-	public int? MetallurgyExperts { get; set; }
-	public int? ExtractionExperts { get; set; }
+	public int AgricultureExperts { get; set; }
+	public int ChemistryExperts { get; set; }
+	public int ConstructionExperts { get; set; }
+	public int ElectronicsExperts { get; set; }
+	public int FoodExperts { get; set; }
+	public int FuelExperts { get; set; }
+	public int ManufacturingExperts { get; set; }
+	public int MetallurgyExperts { get; set; }
+	public int ExtractionExperts { get; set; }
 	public int? Permits { get; set; }
-	public int? AvailableArea { get; set; }
-	public int? UsedArea { get; set; }
+	public int AvailableArea { get; set; } = 500;
+	public int UsedArea { get; set; }
 
 	public Planet Planet { get; set; }
 }

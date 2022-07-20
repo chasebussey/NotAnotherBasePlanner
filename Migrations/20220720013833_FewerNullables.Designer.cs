@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NotAnotherBasePlanner.Data;
 
@@ -11,9 +12,10 @@ using NotAnotherBasePlanner.Data;
 namespace NotAnotherBasePlanner.Migrations
 {
     [DbContext(typeof(PlannerContext))]
-    partial class PlannerContextModelSnapshot : ModelSnapshot
+    [Migration("20220720013833_FewerNullables")]
+    partial class FewerNullables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -276,7 +278,7 @@ namespace NotAnotherBasePlanner.Migrations
 
                     b.HasIndex("PlanetId");
 
-                    b.ToTable("Base", (string)null);
+                    b.ToTable("Base");
                 });
 
             modelBuilder.Entity("NotAnotherBasePlanner.Data.BaseBuilding", b =>
@@ -304,7 +306,7 @@ namespace NotAnotherBasePlanner.Migrations
 
                     b.HasIndex("BuildingTicker");
 
-                    b.ToTable("BaseBuilding", (string)null);
+                    b.ToTable("BaseBuilding");
                 });
 
             modelBuilder.Entity("NotAnotherBasePlanner.Data.BaseBuildingRecipe", b =>
@@ -325,7 +327,7 @@ namespace NotAnotherBasePlanner.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.ToTable("BaseBuildingRecipe", (string)null);
+                    b.ToTable("BaseBuildingRecipe");
                 });
 
             modelBuilder.Entity("NotAnotherBasePlanner.Data.Building", b =>
@@ -360,7 +362,7 @@ namespace NotAnotherBasePlanner.Migrations
 
                     b.HasKey("Ticker");
 
-                    b.ToTable("Building", (string)null);
+                    b.ToTable("Building");
                 });
 
             modelBuilder.Entity("NotAnotherBasePlanner.Data.BuildingCost", b =>
@@ -378,7 +380,7 @@ namespace NotAnotherBasePlanner.Migrations
 
                     b.HasIndex("MaterialTicker");
 
-                    b.ToTable("BuildingCost", (string)null);
+                    b.ToTable("BuildingCost");
                 });
 
             modelBuilder.Entity("NotAnotherBasePlanner.Data.Material", b =>
@@ -405,7 +407,7 @@ namespace NotAnotherBasePlanner.Migrations
 
                     b.HasKey("Ticker");
 
-                    b.ToTable("Material", (string)null);
+                    b.ToTable("Material");
                 });
 
             modelBuilder.Entity("NotAnotherBasePlanner.Data.MaterialRecipe", b =>
@@ -420,7 +422,7 @@ namespace NotAnotherBasePlanner.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.ToTable("MaterialRecipe", (string)null);
+                    b.ToTable("MaterialRecipe");
                 });
 
             modelBuilder.Entity("NotAnotherBasePlanner.Data.Planet", b =>
@@ -459,7 +461,7 @@ namespace NotAnotherBasePlanner.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Planet", (string)null);
+                    b.ToTable("Planet");
                 });
 
             modelBuilder.Entity("NotAnotherBasePlanner.Data.Price", b =>
@@ -496,7 +498,7 @@ namespace NotAnotherBasePlanner.Migrations
 
                     b.HasKey("MaterialTicker", "ExchangeCode");
 
-                    b.ToTable("Price", (string)null);
+                    b.ToTable("Price");
                 });
 
             modelBuilder.Entity("NotAnotherBasePlanner.Data.Recipe", b =>
@@ -530,7 +532,7 @@ namespace NotAnotherBasePlanner.Migrations
 
                     b.HasIndex("BuildingTicker");
 
-                    b.ToTable("Recipe", (string)null);
+                    b.ToTable("Recipe");
                 });
 
             modelBuilder.Entity("NotAnotherBasePlanner.Data.Resource", b =>
@@ -563,7 +565,7 @@ namespace NotAnotherBasePlanner.Migrations
 
                     b.HasIndex("PlanetId");
 
-                    b.ToTable("Resource", (string)null);
+                    b.ToTable("Resource");
                 });
 
             modelBuilder.Entity("NotAnotherBasePlanner.Data.UserPrice", b =>
@@ -595,7 +597,7 @@ namespace NotAnotherBasePlanner.Migrations
 
                     b.HasIndex("UserId1");
 
-                    b.ToTable("UserPrice", (string)null);
+                    b.ToTable("UserPrice");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

@@ -3,6 +3,7 @@
 @using Microsoft.CodeAnalysis
 @inject PlanetService PlanetService
 @inject BuildingService BuildingService
+@inject BaseBuildingService BaseBuildingService
 @inject BaseService BaseService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject ApplicationUserManager UserManager
@@ -32,28 +33,132 @@
             }
         </div>
     </div>
-    <div class="card col-sm-12 col-md-6 gx-0">
+    <div class="card col-sm-12 col-md-6">
+        <div class="card-body">
+            <h5 class="card-title">Overview</h5>
+            <hr/>
+            <h6 class="card-subtitle">Area: </h6><p>@basePlan.UsedArea / @basePlan.AvailableArea</p>
+            
+            <h6 class="card-subtitle">Experts</h6>
+            <table class="table table-striped table-sm">
+                <tbody>
+                <tr>
+                    <td>Agriculture</td>
+                    <td>@basePlan.AgricultureExperts/5</td>
+                    <td>
+                        <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark">+</button><button class="btn btn-outline-dark">-</button></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Chemistry</td>
+                    <td>@basePlan.ChemistryExperts/5</td>
+                    <td>
+                        <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark">+</button><button class="btn btn-outline-dark">-</button></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Construction</td>
+                    <td>@basePlan.ConstructionExperts/5</td>
+                    <td>
+                        <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark">+</button><button class="btn btn-outline-dark">-</button></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Electronics</td>
+                    <td>@basePlan.ElectronicsExperts/5</td>
+                    <td>
+                        <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark">+</button><button class="btn btn-outline-dark">-</button></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Food Industries</td>
+                    <td>@basePlan.FoodExperts/5</td>
+                    <td>
+                        <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark">+</button><button class="btn btn-outline-dark">-</button></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Fuel Refining</td>
+                    <td>@basePlan.FuelExperts/5</td>
+                    <td>
+                        <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark">+</button><button class="btn btn-outline-dark">-</button></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Manufacturing</td>
+                    <td>@basePlan.ManufacturingExperts/5</td>
+                    <td>
+                        <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark">+</button><button class="btn btn-outline-dark">-</button></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Metallurgy</td>
+                    <td>@basePlan.MetallurgyExperts/5</td>
+                    <td>
+                        <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark">+</button><button class="btn btn-outline-dark">-</button></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Resource Extraction</td>
+                    <td>@basePlan.ExtractionExperts/5</td>
+                    <td>
+                        <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark">+</button><button class="btn btn-outline-dark">-</button></div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            
+        </div>
+    </div>
+    <div class="card col-sm-12 col-md-4 gx-0">
+        <div class="card-body">
+            <h5 class="card-title">Financials</h5>
+            <hr/>
+            <table class="table table-striped">
+                <tr>
+                    <td>PE</td>
+                </tr>
+                <tr>
+                    <td>PG</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="card col-sm-12 col-md-8 gx-0">
         <div class="card-body">
             <h5 class="card-title">Buildings</h5>
             <hr/>
             <div class="card-group">
                 @foreach (BaseBuilding building in basePlan.Buildings)
                 {
-                    <div class="card col-4 flex-shrink-0 flex-grow-0 border">
+                    <div class="card col-md-4 col-sm-12 flex-shrink-0 flex-grow-0 border">
                         <div class="card-body"><h6 class="card-title">@building.BuildingTicker | @building.Building.Name</h6>
                             <hr/>
                             Constructed? <input class="form-check-input" type="checkbox" @bind="@building.Constructed"></input> <br/>
                             Efficiency: @building.Efficiency <br/>
                             Recipe(s): <br/>
-                            <select class="form-select d-flex">
+                            <select class="form-select d-flex" @onchange="(e) => SelectedRecipeChanged(e, building)">
+                                <option value="0">Select a recipe</option>
                                 @foreach (Recipe recipe in building.Building.Recipes)
                                 {
                                     @foreach (string mat in recipe.Outputs)
                                     {
-                                        <option>@mat</option>
+                                        <option value="@recipe.RecipeId">@mat</option>
                                     }
                                 }
                             </select>
+                            <button class="btn btn-outline-secondary" @onclick="() => AddRecipe(building)">Add Recipe</button>
+                            <hr/>
+                            @if(building.Recipes is not null)
+                            {
+                                @foreach (BaseBuildingRecipe recipe in building.Recipes)
+                                {
+                                    @string.Join(", ", recipe.Recipe.Outputs.ToArray());
+                                    <br/>
+                                }
+                            }
                         </div>
                         <div class="card-footer">
                             <BuildingCostComponent BaseBuilding="@building" Planet="@planet"></BuildingCostComponent>
@@ -75,8 +180,10 @@
             </div>
         </div>
         <div class="card-footer">
-            <button class="btn btn-primary" @onclick="SaveBase">Save</button>
-            <button class="btn btn-outline-primary" @onclick="DisplayAddBuildingForm">Add Building</button>
+            <div class="btn-group" style="float:right">
+                <button class="btn btn-outline-primary" @onclick="DisplayAddBuildingForm">Add Building</button>
+                <button class="btn btn-primary" @onclick="SaveBase">Save</button>
+            </div>
         </div>
     </div>
 </div>
@@ -92,6 +199,7 @@
     public bool Create { get; set; }
     public string buildingTicker { get; set; }
     public bool addBuilding { get; set; }
+    public List<BaseBuildingRecipe> BaseBuildingRecipes { get; set; }
 
     public string PlanetFullDesignation => !string.IsNullOrEmpty(planet.DisplayName) ? $"{planet.Designation} | {planet.DisplayName}" : planet.Designation;
 
@@ -121,6 +229,7 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
+        BaseBuildingRecipes = new List<BaseBuildingRecipe>();
         planet = PlanetService.LoadPlanetResources(planet);
         if (basePlan is null)
         {
@@ -189,5 +298,33 @@
     public void DeleteBuilding(BaseBuilding building)
     {
         basePlan.Buildings.Remove(building);
+    }
+
+    public void SelectedRecipeChanged(ChangeEventArgs e, BaseBuilding building)
+    {
+        if (e.Value is not null && int.Parse(e.Value.ToString()) != 0)
+        {
+            BaseBuildingRecipe baseBuildingRecipe = new BaseBuildingRecipe()
+            {
+                BaseBuildingId = building.Id,
+                RecipeId = int.Parse(e.Value.ToString())
+            };
+            if (BaseBuildingRecipes.Exists(x => x.BaseBuildingId == building.Id))
+            {
+                BaseBuildingRecipes.Remove(BaseBuildingRecipes.First(x => x.BaseBuildingId == building.Id));
+            }
+            
+            BaseBuildingRecipes.Add(baseBuildingRecipe);
+        }
+    }
+
+    public void AddRecipe(BaseBuilding building)
+    {
+        if (building.Recipes is null)
+        {
+            building.Recipes = new List<BaseBuildingRecipe>();
+        }
+        building.Recipes.Add(BaseBuildingRecipes.First(x => x.BaseBuildingId == building.Id));
+        BaseBuildingService.UpdateBaseBuilding(building);
     }
 }
