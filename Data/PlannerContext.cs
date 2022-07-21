@@ -79,7 +79,10 @@ public class PlannerContext : IdentityDbContext<ApplicationUser>
 		            .HasMany(e => e.Recipes)
 		            .WithOne(e => e.Building)
 		            .HasForeignKey(e => e.BaseBuildingId);
-		
+
+		modelBuilder.Entity<BaseBuilding>()
+		            .Property(e => e.Quantity)
+		            .HasDefaultValue(1);
 		
 		// modelBuilder.Entity<BaseBuildingRecipe>().HasOne(e => e.Building).WithOne().OnDelete(DeleteBehavior.NoAction);
 		// modelBuilder.Entity<BaseBuildingRecipe>().HasOne(e => e.Recipe).WithOne().OnDelete(DeleteBehavior.NoAction);

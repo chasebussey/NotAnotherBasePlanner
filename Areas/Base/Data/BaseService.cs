@@ -11,16 +11,16 @@ public class BaseService
 		this.DbContext = dbContext;
 	}
 
-	public async void AddBaseAsync(Base b)
+	public async Task<int> AddBaseAsync(Base b)
 	{
 		DbContext.Bases.Add(b);
-		await DbContext.SaveChangesAsync();
+		return await DbContext.SaveChangesAsync();
 	}
 
-	public async void UpdateBaseAsync(Base b)
+	public async Task<int> UpdateBaseAsync(Base b)
 	{
 		DbContext.Bases.Update(b);
-		await DbContext.SaveChangesAsync();
+		return await DbContext.SaveChangesAsync();
 	}
 
 	public async Task<List<Base>> GetBasesByUserIdAsync(string userId)
@@ -34,8 +34,8 @@ public class BaseService
 		return await DbContext.Bases.FirstAsync(x => x.Id == new Guid(id));
 	}
 
-	public Base GetBaseByBaseId(string id)
+	public async Task<Base> GetBaseByBaseId(string id)
 	{
-		return DbContext.Bases.First(x => x.Id == new Guid(id));
+		return await DbContext.Bases.FirstAsync(x => x.Id == new Guid(id));
 	}
 }

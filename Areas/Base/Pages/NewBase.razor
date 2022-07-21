@@ -8,7 +8,7 @@
             <h3>New Base</h3>
             <h4>Select a planet:</h4>
 
-            <form @onsubmit="SearchPlanets">
+            <form @onsubmit="async () => await SearchPlanets()">
                 <input type="text" @bind="planetSearchString" placeholder="Planet designation or display name"/>
                 <button type="submit">Search</button>
             </form>
@@ -46,9 +46,9 @@
     public Planet? selectedPlanet { get; set; }
     public Planet[] planets { get; set; }
 
-    public void SearchPlanets()
+    public async Task SearchPlanets()
     {
-        planets = _planetService.GetPlanetsLikeDesignationOrDisplayName(planetSearchString);
+        planets = await _planetService.GetPlanetsLikeDesignationOrDisplayName(planetSearchString);
     }
 
     public void SelectPlanet(Planet planet)

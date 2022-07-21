@@ -1,7 +1,10 @@
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using NotAnotherBasePlanner.Data;
+using NotAnotherBasePlanner.Pages;
 
 namespace NotAnotherBasePlanner.Areas.Base.Pages;
 
@@ -20,12 +23,15 @@ public partial class BaseDesigner
     public string PlanetFullDesignation => !string.IsNullOrEmpty(planet.DisplayName) ? $"{planet.Designation} | {planet.DisplayName}" : planet.Designation;
 
     public string PlanetSurface => planet.Surface ? "ROCKY" : "GASEOUS";
+    
+    public List<ProductionItem> ProductionItems { get; set; }
 
     #region Injects
     [Inject] private PlanetService PlanetService { get; set; } 
     [Inject] private BuildingService BuildingService { get; set; }
     [Inject] private BaseBuildingService BaseBuildingService { get; set; }
     [Inject] private BaseService BaseService { get; set; }
+    [Inject] private MaterialService MaterialService { get; set; }
     [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; }
     [Inject] private ApplicationUserManager UserManager { get; set; }
     #endregion
@@ -51,21 +57,30 @@ public partial class BaseDesigner
         _ => "Normal"
         };
 
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
-        base.OnInitialized();
+        await base.OnInitializedAsync();
+        ProductionItems     = new List<ProductionItem>();
         BaseBuildingRecipes = new List<BaseBuildingRecipe>();
-        planet = PlanetService.LoadPlanetResources(planet);
+        planet              = PlanetService.LoadPlanetResources(planet);
         if (basePlan is null)
         {
             basePlan = new Data.Base();
             basePlan.Buildings = new List<BaseBuilding>();
-            AddBuilding("CM");
+            await AddBuilding("CM");
+            await SaveBase();
         }
-        
+
+        if (basePlan.Buildings.Count > 1)
+        {
+            foreach (BaseBuilding building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM"))
+            {
+                ProductionItems.AddRange(CalculateProductionItems(building));
+            }
+        }
     }
 
-    public async void AddBuilding(string buildingTicker)
+    public async Task AddBuilding(string buildingTicker)
     {
         var building = await BuildingService.GetBuildingByTickerAsync(buildingTicker);
         var baseBuilding = new BaseBuilding
@@ -101,7 +116,7 @@ public partial class BaseDesigner
     {
     }
 
-    public async void SaveBase()
+    public async Task SaveBase()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         if (authState.User.Identity == null) return;
@@ -112,11 +127,11 @@ public partial class BaseDesigner
         basePlan.Planet = planet;
         if (Create)
         {
-            BaseService.AddBaseAsync(basePlan);
+            await BaseService.AddBaseAsync(basePlan);
         }
         else
         {
-            BaseService.UpdateBaseAsync(basePlan);
+            await BaseService.UpdateBaseAsync(basePlan);
         }
     }
 
@@ -143,13 +158,65 @@ public partial class BaseDesigner
         }
     }
 
-    public void AddRecipe(BaseBuilding building)
+    public async Task AddRecipe(BaseBuilding building)
     {
+        BaseBuildingRecipe recipe = BaseBuildingRecipes.First(x => x.BaseBuildingId == building.Id);
         if (building.Recipes is null)
         {
             building.Recipes = new List<BaseBuildingRecipe>();
         }
-        building.Recipes.Add(BaseBuildingRecipes.First(x => x.BaseBuildingId == building.Id));
-        BaseBuildingService.UpdateBaseBuilding(building);
+        building.Recipes.Add(recipe);
+        await BaseBuildingService.UpdateBaseBuilding(building);
+        ProductionItems.AddRange(CalculateProductionItems(building));
     }
+
+    public List<ProductionItem> CalculateProductionItems(BaseBuilding building)
+    {
+        List<ProductionItem> items = new List<ProductionItem>();
+        if (building.Recipes is null || building.Recipes.Count == 0)
+        {
+            return items;
+        }
+
+        int    numBuilding = building.Quantity;
+        double efficiency  = 1.0;
+
+        foreach (var recipe in building.Recipes)
+        {
+            foreach (string input in recipe.Recipe.Inputs)
+            {
+            
+            }
+        
+            foreach (string output in recipe.Recipe.Outputs)
+            {
+                string   recipeStr  = recipe.Recipe.RecipeName;
+                Material mat        = MaterialService.GetMaterialByTicker(output);
+                double   alloc      = recipe.Allocation;
+                int      batchSize  = int.Parse(Regex.Match(recipeStr, "([0-9]*)x" + output).Groups[1].Value);
+                double   outputSize = ((double)batchSize / recipe.Recipe.TimeMs) * 86400000.0; // # ms in a day
+
+                if (!ProductionItems.Any(x => x.Material.Ticker == mat.Ticker && x.Recipe == recipe.Recipe))
+                {
+                    items.Add(new ProductionItem
+                    {
+                        Material = mat,
+                        Amount   = numBuilding * efficiency * outputSize * alloc,
+                        IsInput  = false,
+                        Recipe   = recipe.Recipe
+                    });
+                }
+
+            }
+        }
+        
+        return items;
+    }
+}
+
+public partial class ProductionItem {
+    public Material Material { get; set; }
+    public double Amount { get; set; }
+    public bool IsInput { get; set; }
+    public Recipe Recipe { get; set; }
 }

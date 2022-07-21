@@ -12,5 +12,6 @@ public class BaseBuilding
 	public Building Building { get; set; }
 	public double Efficiency { get; set; }
 	public bool Constructed { get; set; }
+	public int Quantity { get; set; } = 1;
 	public List<BaseBuildingRecipe>? Recipes { get; set; }
 }

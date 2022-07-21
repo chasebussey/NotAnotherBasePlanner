@@ -57,12 +57,20 @@
             <h5 class="card-title">Financials</h5>
             <hr/>
             <table class="table table-striped">
-                <tr>
-                    <td>PE</td>
-                </tr>
-                <tr>
-                    <td>PG</td>
-                </tr>
+                <tbody>
+                @if (ProductionItems.Count > 0)
+                {
+                    @foreach (ProductionItem item in ProductionItems)
+                    {
+                        <tr>
+                            <td>
+                                @item.Material.Ticker
+                            </td>
+                            <td>@item.Amount.ToString("f2")</td>
+                        </tr>
+                    }
+                }
+                </tbody>
             </table>
         </div>
     </div>
@@ -76,7 +84,11 @@
                 @foreach (BaseBuilding building in basePlan.Buildings)
                 {
                     <div class="card col-md-4 col-sm-12 flex-shrink-0 flex-grow-0 border">
-                        <div class="card-body"><h6 class="card-title">@building.BuildingTicker | @building.Building.Name</h6>
+                        <div class="card-body"><h6 style="display:inline" class="card-title">@building.BuildingTicker | @building.Building.Name</h6> | @building.Quantity
+                            <div class="btn-group btn-group-sm" style="float:right">
+                                <button class="btn btn-sm btn-outline-dark">+</button>
+                                <button class="btn btn-outline-dark">-</button>
+                            </div>
                             <hr/>
                             Constructed? <input class="form-check-input" type="checkbox" @bind="@building.Constructed"></input> <br/>
                             Efficiency: @building.Efficiency <br/>
@@ -91,13 +103,16 @@
                                     }
                                 }
                             </select>
-                            <button class="btn btn-outline-secondary" @onclick="() => AddRecipe(building)">Add Recipe</button>
+                            <button class="btn btn-outline-secondary" @onclick="async () => await AddRecipe(building)">Add Recipe</button>
                             <hr/>
-                            @if(building.Recipes is not null)
+                            @if(building.Recipes is not null && building.Recipes.Count > 0)
                             {
+                                double sumOfTimes = building.Recipes.Select(x => x.Recipe.TimeMs).Aggregate((x, y) => x + y);
                                 @foreach (BaseBuildingRecipe recipe in building.Recipes)
                                 {
-                                    @string.Join(", ", recipe.Recipe.Outputs.ToArray())
+                                    recipe.Allocation = recipe.Recipe.TimeMs / sumOfTimes;
+                                    var percentAllocation = recipe.Allocation * 100.0;
+                                    <text>@string.Join(", ", recipe.Recipe.Outputs.ToArray()) | @(percentAllocation.ToString("f2"))%</text>
                                     <br/>
                                 }
                             }
@@ -111,7 +126,7 @@
                 @if (addBuilding)
                 {
                     <div class="card col-4 flex-shrink-0 border p-2">
-                        <form @onsubmit="() => AddBuilding(buildingTicker)">
+                        <form @onsubmit="async () => await AddBuilding(buildingTicker)">
                             <input type="text" class="form-text" @bind="buildingTicker"></input><br/>
                             <button type="submit">Add</button>
                             <button type="button" @onclick="HideAddBuildingForm">Cancel</button>
@@ -124,7 +139,7 @@
         <div class="card-footer">
             <div class="btn-group" style="float:right">
                 <button class="btn btn-outline-primary" @onclick="DisplayAddBuildingForm">Add Building</button>
-                <button class="btn btn-primary" @onclick="SaveBase">Save</button>
+                <button class="btn btn-primary" @onclick="async () => await SaveBase()">Save</button>
             </div>
         </div>
     </div>

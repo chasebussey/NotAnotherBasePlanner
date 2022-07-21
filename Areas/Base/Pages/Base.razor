@@ -2,20 +2,23 @@
 @using NotAnotherBasePlanner.Data
 @inject BaseService BaseService
 
-<BaseDesigner planet="@BasePlan.Planet" basePlan="@BasePlan" Create="false"></BaseDesigner>
+@if (BasePlan is not null)
+{
+    <BaseDesigner planet="@BasePlan.Planet" basePlan="@BasePlan" Create="false"></BaseDesigner>
+}
 
 @code {
     [Parameter]
     public string Id { get; set; }
     
-    private Data.Base BasePlan { get; set; }
+    private Data.Base? BasePlan { get; set; }
     private string PlanetFullDesignation { get; set; }
 
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
-        base.OnInitialized();
-        BasePlan = BaseService.GetBaseByBaseId(Id);
-        
+        await base.OnInitializedAsync();
+        BasePlan = await BaseService.GetBaseByBaseId(Id);
+        StateHasChanged();
         PlanetFullDesignation = !string.IsNullOrEmpty(BasePlan.Planet.DisplayName) ? $"{BasePlan.Planet.Designation} | {BasePlan.Planet.DisplayName}" : BasePlan.Planet.Designation;
     }
 

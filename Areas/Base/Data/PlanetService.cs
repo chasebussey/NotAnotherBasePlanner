@@ -78,11 +78,11 @@ public class PlanetService
 		                      .ToArrayAsync();
 	}
 
-	public Planet[] GetPlanetsLikeDesignationOrDisplayName(string searchString)
+	public async Task<Planet[]> GetPlanetsLikeDesignationOrDisplayName(string searchString)
 	{
-		return DbContext.Planets.Where(x =>
+		return await DbContext.Planets.Where(x =>
 			                               x.Designation.Contains(searchString) ||
-			                               (x.DisplayName != null && x.DisplayName.Contains(searchString))).ToArray();
+			                               (x.DisplayName != null && x.DisplayName.Contains(searchString))).ToArrayAsync();
 	}
 
 	public Planet LoadPlanetResources(Planet planet)

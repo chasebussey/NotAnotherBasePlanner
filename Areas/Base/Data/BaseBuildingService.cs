@@ -10,9 +10,9 @@ public class BaseBuildingService
 		DbContext = dbContext;
 	}
 
-	public async void UpdateBaseBuilding(BaseBuilding building)
+	public async Task<int> UpdateBaseBuilding(BaseBuilding building)
 	{
 		DbContext.BaseBuildings.Update(building);
-		await DbContext.SaveChangesAsync();
+		return await DbContext.SaveChangesAsync();
 	}
 }

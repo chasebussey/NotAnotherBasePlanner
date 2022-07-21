@@ -9,4 +9,6 @@ public class BaseBuildingRecipe
 	public BaseBuilding Building { get; set; }
 	public int? RecipeId { get; set; }
 	public Recipe? Recipe { get; set; }
+	
+	public double Allocation { get; set; }
 }
