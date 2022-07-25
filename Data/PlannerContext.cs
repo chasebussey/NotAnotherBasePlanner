@@ -23,6 +23,8 @@ public class PlannerContext : IdentityDbContext<ApplicationUser>
 	public DbSet<UserPrice> UserPrices { get; set; }
 
 	public DbSet<BaseBuildingRecipe> BaseBuildingRecipes { get; set; }
+	
+	public DbSet<Consumable> Consumables { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{

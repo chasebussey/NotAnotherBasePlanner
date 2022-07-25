@@ -10,7 +10,7 @@ public class BaseBuilding
 	public Base Base { get; set; }
 	public string BuildingTicker { get; set; }
 	public Building Building { get; set; }
-	public double Efficiency { get; set; }
+	public double Efficiency { get; set; } = 1.0;
 	public bool Constructed { get; set; }
 	public int Quantity { get; set; } = 1;
 	public List<BaseBuildingRecipe>? Recipes { get; set; }
