@@ -363,6 +363,8 @@ public partial class BaseDesigner
     {
         ProductionItems = new List<ProductionItem>();
         ProfitPerDay    = 0.0;
+        
+        CalculateEfficiency();
 
         foreach (BaseBuilding building in basePlan.Buildings)
         {
@@ -383,6 +385,106 @@ public partial class BaseDesigner
         //StateHasChanged();
     }
 
+    public void AddExpert(int type)
+    {
+        var expertSum = basePlan.AgricultureExperts + basePlan.ChemistryExperts + basePlan.ConstructionExperts +
+                       basePlan.ElectronicsExperts + basePlan.FoodExperts + basePlan.FuelExperts +
+                       basePlan.ManufacturingExperts + basePlan.MetallurgyExperts + basePlan.ExtractionExperts;
+
+        if (expertSum >= 6)
+            return;
+        
+        switch (type)
+        {
+            case 1:
+                if (basePlan.AgricultureExperts <= 4)
+                    basePlan.AgricultureExperts++;
+                break;
+            case 2:
+                if (basePlan.ChemistryExperts <= 4)
+                    basePlan.ChemistryExperts++;
+                break;
+            case 3:
+                if (basePlan.ConstructionExperts <= 4)
+                    basePlan.ConstructionExperts++;
+                break;
+            case 4:
+                if (basePlan.ElectronicsExperts <= 4)
+                    basePlan.ElectronicsExperts++;
+                break;
+            case 5:
+                if (basePlan.FoodExperts <= 4)
+                    basePlan.FoodExperts++;
+                break;
+            case 6:
+                if (basePlan.FuelExperts <= 4)
+                    basePlan.FuelExperts++;
+                break;
+            case 7:
+                if (basePlan.ManufacturingExperts <= 4)
+                    basePlan.ManufacturingExperts++;
+                break;
+            case 8:
+                if (basePlan.MetallurgyExperts <= 4)
+                    basePlan.MetallurgyExperts++;
+                break;
+            case 9:
+                if (basePlan.ExtractionExperts <= 4)
+                    basePlan.ExtractionExperts++;
+                break;
+            default:
+                break;
+        }
+        
+        RefreshProductionItems();
+    }
+    public void RemoveExpert(int type)
+    {
+        switch (type)
+        {
+            case 1:
+                if (basePlan.AgricultureExperts >= 1)
+                    basePlan.AgricultureExperts--;
+                break;
+            case 2:
+                if (basePlan.ChemistryExperts >= 1)
+                    basePlan.ChemistryExperts--;
+                break;
+            case 3:
+                if (basePlan.ConstructionExperts >= 1)
+                    basePlan.ConstructionExperts--;
+                break;
+            case 4:
+                if (basePlan.ElectronicsExperts >= 1)
+                    basePlan.ElectronicsExperts--;
+                break;
+            case 5:
+                if (basePlan.FoodExperts >= 1)
+                    basePlan.FoodExperts--;
+                break;
+            case 6:
+                if (basePlan.FuelExperts >= 1)
+                    basePlan.FuelExperts--;
+                break;
+            case 7:
+                if (basePlan.ManufacturingExperts >= 1)
+                    basePlan.ManufacturingExperts--;
+                break;
+            case 8:
+                if (basePlan.MetallurgyExperts >= 1)
+                    basePlan.MetallurgyExperts--;
+                break;
+            case 9:
+                if (basePlan.ExtractionExperts >= 1)
+                    basePlan.ExtractionExperts--;
+                break;
+            default:
+                break;
+        }
+        
+        RefreshProductionItems();
+    }
+
     public void IncreaseBuildingQuantity(BaseBuilding building)
     {
         building.Quantity++;
@@ -395,6 +497,144 @@ public partial class BaseDesigner
             building.Quantity--;
         RefreshProductionItems();
     }
+
+    #region ReallyDumbExpertMethods
+
+    public void CalculateEfficiency()
+    {
+        CalculateAgriculture();
+        CalculateChemistry();
+        CalculateConstruction();
+        CalculateElectronics();
+        CalculateFood();
+        CalculateFuel();
+        CalculateManufacturing();
+        CalculateMetallurgy();
+        CalculateExtraction();
+    }
+
+    public void CalculateAgriculture()
+    {
+        double expertBoost = ExpertBoost(basePlan.AgricultureExperts);
+        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("AGRICULTURE"))) return;
+
+        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("AGRICULTURE")))
+        {
+            building.Efficiency = 1.0 + expertBoost;
+        }
+        
+    }
+
+    public void CalculateChemistry()
+    {
+        double expertBoost = ExpertBoost(basePlan.ChemistryExperts);
+
+        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("CHEMISTRY"))) return;
+
+        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("CHEMISTRY")))
+        {
+            building.Efficiency = 1.0 + expertBoost;
+        }
+        
+    }
+
+    public void CalculateConstruction()
+    {
+        double expertBoost = ExpertBoost(basePlan.ConstructionExperts);
+        
+        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("CONSTRUCTION"))) return;
+
+        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("CONSTRUCTION")))
+        {
+            building.Efficiency = 1.0 + expertBoost;
+        }
+    }
+
+    public void CalculateElectronics()
+    {
+        double expertBoost = ExpertBoost(basePlan.ElectronicsExperts);
+        
+        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("ELECTRONICS"))) return;
+
+        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("ELECTRONICS")))
+        {
+            building.Efficiency = 1.0 + expertBoost;
+        }
+    }
+
+    public void CalculateFood()
+    {
+        double expertBoost = ExpertBoost(basePlan.FoodExperts);
+
+        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("FOOD_INDUSTRIES"))) return;
+        
+        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("FOOD_INDUSTRIES")))
+        {
+            building.Efficiency = 1.0 + expertBoost;
+        }
+    }
+
+    public void CalculateFuel()
+    {
+        double expertBoost = ExpertBoost(basePlan.FuelExperts);
+        
+        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("FUEL_REFINING"))) return;
+
+        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("FUEL_REFINING")))
+        {
+            building.Efficiency = 1.0 + expertBoost;
+        }
+    }
+
+    public void CalculateManufacturing()
+    {
+        double expertBoost = ExpertBoost(basePlan.ManufacturingExperts);
+        
+        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("MANUFACTURING"))) return;
+
+        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("MANUFACTURING")))
+        {
+            building.Efficiency = 1.0 + expertBoost;
+        }
+    }
+
+    public void CalculateMetallurgy()
+    {
+        double expertBoost = ExpertBoost(basePlan.MetallurgyExperts);
+        
+        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("METALLURGY"))) return;
+
+        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("METALLURGY")))
+        {
+            building.Efficiency = 1.0 + expertBoost;
+        }
+    }
+
+    public void CalculateExtraction()
+    {
+        double expertBoost = ExpertBoost(basePlan.FoodExperts);
+        
+        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("RESOURCE_EXTRACTION"))) return;
+
+        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("RESOURCE_EXTRACTION")))
+        {
+            building.Efficiency = 1.0 + expertBoost;
+        }
+    }
+
+    private double ExpertBoost(int experts)
+    {
+        return experts switch
+        {
+            1 => 0.0306,
+            2 => 0.0696,
+            3 => 0.1248,
+            4 => 0.1974,
+            5 => 0.284,
+            _ => 0
+        };
+    }
+    #endregion
 }
 
 public class ProductionItem {
