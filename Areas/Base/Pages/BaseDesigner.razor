@@ -37,17 +37,21 @@
                 <tr>
                     <td></td>
                     <td>Required</td>
-                    <td>Current</td>
                     <td>Capacity</td>
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                    <td>Pioneers</td>
-                    <td>1000</td>
-                    <td>1000</td>
-                    <td>0</td>
-                </tr>
+                @if (workforceCapacity is not null && workforceFigures is not null && workforceCapacity.Count > 0 && workforceCapacity.Count > 0)
+                {
+                    @foreach (string key in workforceFigures.Keys)
+                    {
+                        <tr>
+                            <td>@key</td>
+                            <td>@workforceFigures[key]</td>
+                            <td>@workforceCapacity[key]</td>
+                        </tr>
+                    }
+                }
                 </tbody>
             </table>
            </div>

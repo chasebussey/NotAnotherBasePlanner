@@ -29,6 +29,9 @@ public partial class BaseDesigner
     public List<Consumable> Consumables { get; set; }
     
     public double ProfitPerDay { get; set; }
+    
+    public Dictionary<string, int> workforceFigures { get; set; }
+    public Dictionary<string, int> workforceCapacity { get; set; }
 
     #region Injects
     [Inject] private PlanetService PlanetService { get; set; } 
@@ -83,10 +86,9 @@ public partial class BaseDesigner
 
         if (basePlan.Buildings.Count > 1)
         {
-            foreach (BaseBuilding building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM"))
-            {
-                ProductionItems.AddRange(CalculateProductionItems(building));
-            }
+            CalculateWorkforce();
+            RefreshProductionItems();
+            StateHasChanged();
         }
     }
 
@@ -496,6 +498,60 @@ public partial class BaseDesigner
         if (building.Quantity > 0)
             building.Quantity--;
         RefreshProductionItems();
+    }
+
+    public void CalculateWorkforce()
+    {
+        workforceFigures = new Dictionary<string, int>
+        {
+            {"PIO", 0},
+            {"SET", 0},
+            {"TEC", 0},
+            {"ENG", 0},
+            {"SCI", 0}
+        };
+        
+        workforceCapacity = new Dictionary<string, int>
+        {
+            {"PIO", 0},
+            {"SET", 0},
+            {"TEC", 0},
+            {"ENG", 0},
+            {"SCI", 0}
+        };
+        
+        foreach (BaseBuilding building in basePlan.Buildings)
+        {
+            workforceFigures["PIO"] += building.Building.Pioneers * building.Quantity;
+            workforceFigures["SET"] += building.Building.Settlers * building.Quantity;
+            workforceFigures["TEC"] += building.Building.Technicians * building.Quantity;
+            workforceFigures["ENG"] += building.Building.Engineers * building.Quantity;
+            workforceFigures["SCI"] += building.Building.Scientists * building.Quantity;
+        }
+        
+        foreach (BaseBuilding building in basePlan.Buildings.Where(x => x.Building.Name.Contains("habitation")))
+        {
+            switch (building.Building.Ticker)
+            {
+                case "HB1":
+                    workforceCapacity["PIO"] += 100 * building.Quantity;
+                    break;
+                case "HB2":
+                    workforceCapacity["SET"] += 100 * building.Quantity;
+                    break;
+                case "HB3":
+                    workforceCapacity["TEC"] += 100 * building.Quantity;
+                    break;
+                case "HB4":
+                    workforceCapacity["ENG"] += 100 * building.Quantity;
+                    break;
+                case "HB5":
+                    workforceCapacity["SCI"] += 100 * building.Quantity;
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     #region ReallyDumbExpertMethods
