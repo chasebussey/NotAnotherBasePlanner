@@ -51,14 +51,10 @@ public class PlanetService
 
 	public async Task<Planet> GetPlanetByDesignationOrDisplayName(string searchString)
 	{
-		return await DbContext.Planets.FirstOrDefaultAsync(x =>
-			                                                   x.Designation.Equals(
-				                                                   searchString,
-				                                                   StringComparison.InvariantCultureIgnoreCase) ||
-			                                                   (x.DisplayName != null &&
-			                                                    x.DisplayName.Equals(
-				                                                    searchString,
-				                                                    StringComparison.InvariantCultureIgnoreCase)));
+		return await DbContext.Planets.FirstOrDefaultAsync(
+			x => x.Designation.Equals(searchString, StringComparison.InvariantCultureIgnoreCase) ||
+			     (x.DisplayName != null &&
+			      x.DisplayName.Equals(searchString, StringComparison.InvariantCultureIgnoreCase)));
 	}
 
 	public async Task<Planet[]> GetPlanetsByFactionCode(string factionCode)

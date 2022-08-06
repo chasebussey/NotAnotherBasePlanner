@@ -26,6 +26,7 @@ builder.Services.AddScoped<BaseService>();
 builder.Services.AddScoped<BaseBuildingService>();
 builder.Services.AddScoped<MaterialRecipeService>();
 builder.Services.AddScoped<ConsumableService>();
+builder.Services.AddScoped<UserPriceService>();
 builder.Services.AddScoped(ps =>
 {
 	var materialService = ps.GetService<MaterialService>();

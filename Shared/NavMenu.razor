@@ -43,7 +43,7 @@
         <AuthorizeView>
             <hr style="color:whitesmoke" />
             <div class="nav-item px-3">
-                <NavLink class="nav-link" @onclick="ToggleBases">
+                <NavLink class="nav-link" @onclick="async () => await ToggleBases()">
                     <span class="oi oi-spreadsheet" aria-hidden="true"></span> Bases    
                     @if (ShowBases)
                     {
@@ -77,6 +77,12 @@
                     </NavLink>
                 </div>
             }
+            
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="userprices">
+                    <span class="oi oi-dollar" aria-hidden="true"></span>Price Overrides
+                </NavLink>
+            </div>
         </AuthorizeView>
     </nav>
 </div>
@@ -96,15 +102,18 @@
 
     protected override async void OnInitialized()
     {
-        base.OnInitialized();
+        await base.OnInitializedAsync();
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var userId = await UserManager.GetUserIdAsync(authState.User.Identity.Name);
+        if (authState.User.Identity.Name is not null)
+        {
+            var userId = await UserManager.GetUserIdAsync(authState.User.Identity.Name);
 
-        Bases = await BaseService.GetBasesByUserIdAsync(userId);
-        StateHasChanged();
+            Bases = await BaseService.GetBasesByUserIdAsync(userId);
+            StateHasChanged();
+        }
     }
 
-    private async void ToggleBases()
+    private async Task ToggleBases()
     {
         ShowBases = !ShowBases;
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();

@@ -27,6 +27,7 @@ public partial class BaseDesigner
     public List<ProductionItem> ProductionItems { get; set; }
     public List<Price> Prices { get; set; }
     public List<Consumable> Consumables { get; set; }
+    public List<UserPrice> UserPrices { get; set; }
     
     public double ProfitPerDay { get; set; }
     
@@ -43,6 +44,7 @@ public partial class BaseDesigner
     [Inject] private ApplicationUserManager UserManager { get; set; }
     [Inject] private PriceService PriceService { get; set; }
     [Inject] private ConsumableService ConsumableService { get; set; }
+    [Inject] private UserPriceService UserPriceService { get; set; }
     #endregion
 
     private string PlanetGravity => planet switch
@@ -81,8 +83,12 @@ public partial class BaseDesigner
             await SaveBase();
             Create = false;
         }
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var userId    = await UserManager.GetUserIdAsync(authState.User.Identity.Name);
         
         Consumables = await ConsumableService.GetConsumables();
+        UserPrices  = await UserPriceService.GetUserPrices(userId);
 
         if (basePlan.Buildings.Count > 1)
         {
@@ -181,6 +187,45 @@ public partial class BaseDesigner
         ProductionItems.AddRange(CalculateProductionItems(building));
     }
 
+    public ProductionItem? GenerateProductionItem(string item, BaseBuildingRecipe recipe, int numBuilding, double efficiency, bool isInput)
+    {
+        if (ProductionItems.Any(x => x.Material.Ticker == item && x.Recipe == recipe.Recipe))
+        {
+            return null;
+        }
+        string   recipeStr = recipe.Recipe.RecipeName;
+        Material mat       = MaterialService.GetMaterialByTicker(item);
+        double   alloc     = recipe.Allocation;
+        int      batchSize = int.Parse(Regex.Match(recipeStr, "([0-9]*)x" + item).Groups[1].Value);
+        double   inputSize = ((double)batchSize / recipe.Recipe.TimeMs) * 86400000.0;
+        
+        double unitPrice;
+
+        if (UserPrices is not null &&
+            UserPrices.Any(x => x.MaterialTicker.Equals(item, StringComparison.InvariantCultureIgnoreCase)))
+        {
+            unitPrice = UserPrices.FirstOrDefault(x => x.MaterialTicker.Equals(item)).Price;
+        }
+        else
+        {
+            unitPrice = Prices.First(x => x.MaterialTicker.Equals(mat.Ticker) &&
+                                          x.ExchangeCode.Equals("NC1", StringComparison.InvariantCultureIgnoreCase))
+                              .PriceAverage ?? 0.0;
+        }
+        
+        double amount = numBuilding * efficiency * inputSize * alloc;
+        double price  = unitPrice * amount;
+
+        return (new ProductionItem
+        {
+            Material = mat,
+            Amount   = numBuilding * efficiency * inputSize * alloc,
+            IsInput  = isInput,
+            Recipe   = recipe.Recipe,
+            Price    = price
+        });
+    }
+
     public List<ProductionItem> CalculateProductionItems(BaseBuilding building)
     {
         List<ProductionItem> items = new List<ProductionItem>();
@@ -196,57 +241,20 @@ public partial class BaseDesigner
         {
             foreach (string input in recipe.Recipe.Inputs)
             {
-                string   recipeStr = recipe.Recipe.RecipeName;
-                Material mat       = MaterialService.GetMaterialByTicker(input);
-                double   alloc     = recipe.Allocation;
-                int      batchSize = int.Parse(Regex.Match(recipeStr, "([0-9]*)x" + input).Groups[1].Value);
-                double   inputSize = ((double)batchSize / recipe.Recipe.TimeMs) * 86400000.0;
-                
-                double unitPrice =
-                    Prices.First(x => x.MaterialTicker.Equals(mat.Ticker) && x.ExchangeCode.Equals("NC1", StringComparison.InvariantCultureIgnoreCase))
-                          .PriceAverage ?? 0.0;
-                double amount = numBuilding * efficiency * inputSize * alloc;
-                double price  = unitPrice * amount;
-
-                if (!ProductionItems.Any(x => x.Material.Ticker == mat.Ticker && x.Recipe == recipe.Recipe))
+                ProductionItem? item = GenerateProductionItem(input, recipe, numBuilding, efficiency, isInput: true);
+                if (item is not null)
                 {
-                    items.Add(new ProductionItem
-                    {
-                        Material = mat,
-                        Amount   = numBuilding * efficiency * inputSize * alloc,
-                        IsInput  = true,
-                        Recipe   = recipe.Recipe,
-                        Price    = price
-                    });
+                    items.Add(item);
                 }
             }
 
             foreach (string output in recipe.Recipe.Outputs)
             {
-                string   recipeStr  = recipe.Recipe.RecipeName;
-                Material mat        = MaterialService.GetMaterialByTicker(output);
-                double   alloc      = recipe.Allocation;
-                int      batchSize  = int.Parse(Regex.Match(recipeStr, "([0-9]*)x" + output).Groups[1].Value);
-                double   outputSize = ((double)batchSize / recipe.Recipe.TimeMs) * 86400000.0; // # ms in a day
-                
-                double unitPrice =
-                    Prices.First(x => x.MaterialTicker.Equals(mat.Ticker) && x.ExchangeCode.Equals("NC1", StringComparison.InvariantCultureIgnoreCase))
-                          .PriceAverage ?? 0.0;
-                double amount = numBuilding * efficiency * outputSize * alloc;
-                double price  = unitPrice * amount;
-
-                if (!ProductionItems.Any(x => x.Material.Ticker == mat.Ticker && x.Recipe == recipe.Recipe))
+                ProductionItem? item = GenerateProductionItem(output, recipe, numBuilding, efficiency, isInput: false);
+                if (item is not null)
                 {
-                    items.Add(new ProductionItem
-                    {
-                        Material = mat,
-                        Amount   = numBuilding * efficiency * outputSize * alloc,
-                        IsInput  = false,
-                        Recipe   = recipe.Recipe,
-                        Price    = price
-                    });
+                    items.Add(item);
                 }
-
             }
         }
 

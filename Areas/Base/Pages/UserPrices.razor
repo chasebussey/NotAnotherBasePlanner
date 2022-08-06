@@ -1,0 +1,75 @@
+@page "/UserPrices"
+@using NotAnotherBasePlanner.Data
+@inject UserPriceService UserPriceService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ApplicationUserManager UserManager
+<h3>UserPrices</h3>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <td>
+            Material
+        </td>
+        <td>
+            Price
+        </td>
+        <td>
+            Actions
+        </td>
+    </tr>
+    </thead>
+    <tbody>
+    @if (CustomPrices is not null && CustomPrices.Count > 0)
+    {
+        @foreach (UserPrice price in CustomPrices)
+        {
+            <tr>
+                <td>
+                    @price.MaterialTicker
+                </td>
+                <td>
+                    @price.Price
+                </td>
+                <td>
+                    <div class="btn-group-sm">
+                        <button class="btn btn-primary">Update</button>
+                        <button class="btn btn-danger">Delete</button>
+                    </div>
+                </td>
+            </tr>
+        }
+    }
+    <tr>
+        <td><input type="text" placeholder="Ticker" @bind="Ticker"/></td>
+        <td><input type="number" @bind="Cost"/></td>
+        <td><button class="btn btn-primary" @onclick="AddCustomPrice">Add</button></td>
+    </tr>
+    </tbody>
+</table>
+
+@code {
+    private List<UserPrice> CustomPrices { get; set; }
+    
+    private string Ticker { get; set; }
+    private double Cost { get; set; }
+    private string UserId { get; set; }
+
+    protected override async void OnInitialized()
+    {
+        await base.OnInitializedAsync();
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var userId = await UserManager.GetUserIdAsync(authState.User.Identity.Name);
+        UserId = userId;
+
+        CustomPrices = await UserPriceService.GetUserPrices(userId);
+        StateHasChanged();
+    }
+
+    private async void AddCustomPrice()
+    {
+        await UserPriceService.AddUserPrice(Ticker, Cost, UserId);
+        StateHasChanged();
+    }
+}
