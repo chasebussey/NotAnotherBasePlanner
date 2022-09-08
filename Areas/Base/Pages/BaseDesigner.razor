@@ -7,102 +7,179 @@
 </style>
 <h3>Base: @PlanetFullDesignation</h3>
 
-<div class="row">
-    <div id="planet info" class="card col-sm-12 col-md-2">
-        <div class="card-body">
-            <h5 class="card-title">Planet Info</h5>
-            <hr/>
-            <h6 class="card-subtitle">Characteristics</h6>
-            <span style="display: inline-block; min-width: 6.25em">Surface:</span> @PlanetSurface <br/>
-            <span style="display: inline-block; min-width: 6.25em">Gravity:</span> @PlanetGravity <br/>
-            <span style="display: inline-block; min-width: 6.25em">Temperature:</span> @PlanetTemperature <br/>
-            <span style="display: inline-block; min-width: 6.25em">Pressure:</span > @PlanetPressure
-            <hr/>
-            <h6 class="card-subtitle">Resources</h6>
-            @foreach (Resource res in planet.Resources)
-            {
-                <text><span style="display: inline-block; min-width: 2em">@res.MaterialTicker</span> | <span style="display: inline-block; min-width: 5em">@res.Type</span> | @res.Concentration.ToString("F2")<br/></text>
-            }
+<div style="display: flex; flex-wrap: nowrap">
+<div id="notFinancials" class="col col-md-8 gx-0">
+    <div class="row">
+        <div id="planet info" class="card col-md-4">
+            <div class="card-body">
+                <h5 class="card-title">Planet Info</h5>
+                <hr/>
+                <h6 class="card-subtitle">Characteristics</h6>
+                <span style="display: inline-block; min-width: 6.25em">Surface:</span> @PlanetSurface <br/>
+                <span style="display: inline-block; min-width: 6.25em">Gravity:</span> @PlanetGravity <br/>
+                <span style="display: inline-block; min-width: 6.25em">Temperature:</span> @PlanetTemperature <br/>
+                <span style="display: inline-block; min-width: 6.25em">Pressure:</span > @PlanetPressure
+                <hr/>
+                <h6 class="card-subtitle">Resources</h6>
+                @foreach (Resource res in planet.Resources)
+                {
+                    <text><span style="display: inline-block; min-width: 2em">@res.MaterialTicker</span> | <span style="display: inline-block; min-width: 5em">@res.Type</span> | @res.Concentration.ToString("F2")<br/></text>
+                }
+            </div>
+        </div>
+        <div id="base overview" class="card col-md-8">
+            <div class="card-body">
+                <h5 class="card-title">Overview</h5>
+                <hr/>
+                <h6 class="card-subtitle">Area: </h6>
+                <p>@basePlan.UsedArea / @basePlan.AvailableArea</p>
+
+                <h6 class="card-subtitle">Workforce</h6>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <td></td>
+                        <td>Required</td>
+                        <td>Capacity</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @if (workforceCapacity is not null && workforceFigures is not null && workforceCapacity.Count > 0 && workforceCapacity.Count > 0)
+                    {
+                        @foreach (string key in workforceFigures.Keys)
+                        {
+                            <tr>
+                                <td>@key</td>
+                                <td>@workforceFigures[key]</td>
+                                <td>@workforceCapacity[key]</td>
+                            </tr>
+                        }
+                    }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-    <div id="base overview" class="card col-sm-12 col-md-6">
-        <div class="card-body">
-            <h5 class="card-title">Overview</h5>
-            <hr/>
-            <h6 class="card-subtitle">Area: </h6><p>@basePlan.UsedArea / @basePlan.AvailableArea</p>
-            
-            <h6 class="card-subtitle">Workforce</h6>
-            <table class="table">
-                <thead>
-                <tr>
-                    <td></td>
-                    <td>Required</td>
-                    <td>Capacity</td>
-                </tr>
-                </thead>
-                <tbody>
-                @if (workforceCapacity is not null && workforceFigures is not null && workforceCapacity.Count > 0 && workforceCapacity.Count > 0)
-                {
-                    @foreach (string key in workforceFigures.Keys)
+    <div class="row">
+        <div id="base buildings" class="card col-sm-12 col-md-12 gx-0">
+            <div class="card-body">
+                <h5 class="card-title">Buildings</h5>
+                <hr/>
+                <div class="card-group">
+                    @foreach (BaseBuilding building in basePlan.Buildings)
                     {
-                        <tr>
-                            <td>@key</td>
-                            <td>@workforceFigures[key]</td>
-                            <td>@workforceCapacity[key]</td>
-                        </tr>
+                        <div class="card col-md-4 col-sm-12 flex-shrink-0 flex-grow-0 border">
+                            <div class="card-body"><h6 style="display:inline" class="card-title">@building.BuildingTicker</h6> | @building.Quantity
+                                <div class="btn-group btn-group-sm" style="float:right">
+                                    <button class="btn btn-sm btn-outline-dark" @onclick="() => IncreaseBuildingQuantity(building)">+</button>
+                                    <button class="btn btn-outline-dark" @onclick="() => DecreaseBuildingQuantity(building)">-</button>
+                                </div>
+                                <hr/>
+                                Constructed? <input class="form-check-input" type="checkbox" @bind="@building.Constructed"></input> <br/>
+                                Efficiency: @building.Efficiency <br/>
+                                Recipe(s): <br/>
+                                <select class="form-select d-flex" @onchange="(e) => SelectedRecipeChanged(e, building)">
+                                    <option value="0">Select a recipe</option>
+                                    @foreach (Recipe recipe in building.Building.Recipes)
+                                    {
+                                        @foreach (string mat in recipe.Outputs)
+                                        {
+                                            <option value="@recipe.RecipeId">@mat</option>
+                                        }
+                                    }
+                                </select>
+                                <button class="btn btn-outline-secondary" @onclick="async () => await AddRecipe(building)">Add Recipe</button>
+                                <hr/>
+                                @if (building.Recipes is not null && building.Recipes.Count > 0)
+                                {
+                                    double sumOfTimes = building.Recipes.Select(x => x.Recipe.TimeMs).Aggregate((x, y) => x + y);
+                                    @foreach (BaseBuildingRecipe recipe in building.Recipes)
+                                    {
+                                        recipe.Allocation = recipe.Recipe.TimeMs / sumOfTimes;
+                                        var percentAllocation = recipe.Allocation * 100.0;
+                                        <text>@string.Join(", ", recipe.Recipe.Outputs.ToArray()) | @(percentAllocation.ToString("N2"))%</text>
+                                        <br/>
+                                    }
+                                }
+                            </div>
+                            <div class="card-footer">
+                                <BuildingCostComponent BaseBuilding="@building" Planet="@planet"></BuildingCostComponent>
+                                <button type="button" class="btn btn-outline-danger" @onclick="() => DeleteBuilding(building)">Delete</button>
+                            </div>
+                        </div>
                     }
-                }
-                </tbody>
-            </table>
-           </div>
+                    @if (addBuilding)
+                    {
+                        <div class="card col-4 flex-shrink-0 border p-2">
+                            <form @onsubmit="async () => await AddBuilding(buildingTicker)">
+                                <input type="text" class="form-text" @bind="buildingTicker"></input><br/>
+                                <button type="submit">Add</button>
+                                <button type="button" @onclick="HideAddBuildingForm">Cancel</button>
+                            </form>
+                        </div>
+                    }
+
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="btn-group" style="float:right">
+                    <button class="btn btn-outline-primary" @onclick="DisplayAddBuildingForm">Add Building</button>
+                    <button class="btn btn-primary" @onclick="async () => await SaveBase()">Save</button>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="card col-sm-12 col-md-4 gx-0">
-        <div class="card-body">
-            <h5 class="card-title">Financials</h5>
-            <hr/>
-            <h6 style="display: inline">Profit/Day: </h6> @ProfitPerDay.ToString("N2") NCC
-            <table id="daily inputs" class="table table-striped">
-                <thead>
-                <tr>
-                    <td>
-                        Inputs
-                    </td>
-                    <td>
-                        Daily Amount
-                    </td>
-                    <td>
-                        Cost
-                    </td>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach (ProductionItem item in ProductionItems.Where(x => x.IsInput))
-                {
+</div>
+
+<div class="col col-md-4 gx-0">
+    <div class="row">
+        <div class="card col-sm-12 col-md-12 gx-0">
+            <div class="card-body">
+                <h5 class="card-title">Financials</h5>
+                <hr/>
+                <h6 style="display: inline">Profit/Day: </h6> @ProfitPerDay.ToString("N2") NCC
+                <table id="daily inputs" class="table table-striped">
+                    <thead>
                     <tr>
                         <td>
-                            @item.Material.Ticker
+                            Inputs
                         </td>
-                        <td>@item.Amount.ToString("N2")</td>
-                        <td style="color:red">-@item.Price.ToString("N2") NCC</td>
+                        <td>
+                            Daily Amount
+                        </td>
+                        <td>
+                            Cost
+                        </td>
                     </tr>
-                }
-                </tbody>
-            </table>
-            <table id="daily outputs" class="table table-striped">
-                <thead>
-                <tr>
-                    <td>
-                        Outputs
-                    </td>
-                    <td>
-                        Daily Amount
-                    </td>
-                    <td>
-                        Revenue
-                    </td>
-                </tr>
-                </thead>
-                <tbody>
+                    </thead>
+                    <tbody>
+                    @foreach (ProductionItem item in ProductionItems.Where(x => x.IsInput))
+                    {
+                        <tr>
+                            <td>
+                                @item.Material.Ticker
+                            </td>
+                            <td>@item.Amount.ToString("N2")</td>
+                            <td style="color:red">-@item.Price.ToString("N2") NCC</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+                <table id="daily outputs" class="table table-striped">
+                    <thead>
+                    <tr>
+                        <td>
+                            Outputs
+                        </td>
+                        <td>
+                            Daily Amount
+                        </td>
+                        <td>
+                            Revenue
+                        </td>
+                    </tr>
+                    </thead>
+                    <tbody>
                     @foreach (ProductionItem item in ProductionItems.Where(x => !x.IsInput))
                     {
                         <tr>
@@ -113,166 +190,98 @@
                             <td style="color:green">@item.Price.ToString("N2") NCC</td>
                         </tr>
                     }
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div id="base buildings" class="card col-sm-12 col-md-8 gx-0">
-        <div class="card-body">
-            <h5 class="card-title">Buildings</h5>
-            <hr/>
-            <div class="card-group">
-                @foreach (BaseBuilding building in basePlan.Buildings)
-                {
-                    <div class="card col-md-4 col-sm-12 flex-shrink-0 flex-grow-0 border">
-                        <div class="card-body"><h6 style="display:inline" class="card-title">@building.BuildingTicker</h6> | @building.Quantity
-                            <div class="btn-group btn-group-sm" style="float:right">
-                                <button class="btn btn-sm btn-outline-dark" @onclick="() => IncreaseBuildingQuantity(building)">+</button>
-                                <button class="btn btn-outline-dark" @onclick="() => DecreaseBuildingQuantity(building)">-</button>
-                            </div>
-                            <hr/>
-                            Constructed? <input class="form-check-input" type="checkbox" @bind="@building.Constructed"></input> <br/>
-                            Efficiency: @building.Efficiency <br/>
-                            Recipe(s): <br/>
-                            <select class="form-select d-flex" @onchange="(e) => SelectedRecipeChanged(e, building)">
-                                <option value="0">Select a recipe</option>
-                                @foreach (Recipe recipe in building.Building.Recipes)
-                                {
-                                    @foreach (string mat in recipe.Outputs)
-                                    {
-                                        <option value="@recipe.RecipeId">@mat</option>
-                                    }
-                                }
-                            </select>
-                            <button class="btn btn-outline-secondary" @onclick="async () => await AddRecipe(building)">Add Recipe</button>
-                            <hr/>
-                            @if(building.Recipes is not null && building.Recipes.Count > 0)
-                            {
-                                double sumOfTimes = building.Recipes.Select(x => x.Recipe.TimeMs).Aggregate((x, y) => x + y);
-                                @foreach (BaseBuildingRecipe recipe in building.Recipes)
-                                {
-                                    recipe.Allocation = recipe.Recipe.TimeMs / sumOfTimes;
-                                    var percentAllocation = recipe.Allocation * 100.0;
-                                    <text>@string.Join(", ", recipe.Recipe.Outputs.ToArray()) | @(percentAllocation.ToString("N2"))%</text>
-                                    <br/>
-                                }
-                            }
-                        </div>
-                        <div class="card-footer">
-                            <BuildingCostComponent BaseBuilding="@building" Planet="@planet"></BuildingCostComponent>
-                            <button type="button" class="btn btn-outline-danger" @onclick="() => DeleteBuilding(building)">Delete</button>
-                        </div>
-                    </div>
-                }
-                @if (addBuilding)
-                {
-                    <div class="card col-4 flex-shrink-0 border p-2">
-                        <form @onsubmit="async () => await AddBuilding(buildingTicker)">
-                            <input type="text" class="form-text" @bind="buildingTicker"></input><br/>
-                            <button type="submit">Add</button>
-                            <button type="button" @onclick="HideAddBuildingForm">Cancel</button>
-                        </form>
-                    </div>
-                }
-                
+                    </tbody>
+                </table>
             </div>
-        </div>
-        <div class="card-footer">
-            <div class="btn-group" style="float:right">
-                <button class="btn btn-outline-primary" @onclick="DisplayAddBuildingForm">Add Building</button>
-                <button class="btn btn-primary" @onclick="async () => await SaveBase()">Save</button>
+        </div></div>
+    <div class="row">
+        <div class="card col-sm-12 col-md-12">
+            <div class="card-body">
+                <h5 class="card-title">Efficiency Factors</h5>
+                <hr/>
+                <h6>COGC</h6>
+                <select @bind="basePlan.CogcIndustry">
+                    <!-- there has to be a better way to replicate onchange here -->
+                    <option value="0" @onclick="RefreshProductionItems">--</option>
+                    <option value="1" @onclick="RefreshProductionItems">Agriculture</option>
+                    <option value="2" @onclick="RefreshProductionItems">Chemistry</option>
+                    <option value="3" @onclick="RefreshProductionItems">Construction</option>
+                    <option value="4" @onclick="RefreshProductionItems">Electronics</option>
+                    <option value="5" @onclick="RefreshProductionItems">Food Industries</option>
+                    <option value="6" @onclick="RefreshProductionItems">Fuel Refining</option>
+                    <option value="7" @onclick="RefreshProductionItems">Manufacturing</option>
+                    <option value="8" @onclick="RefreshProductionItems">Metallurgy</option>
+                    <option value="9" @onclick="RefreshProductionItems">Resource Extraction</option>
+                </select>
+                <hr/>
+                <h6>Experts</h6>
+                <table id="experts" class="table table-striped table-sm">
+                    <tbody>
+                    <tr>
+                        <td>Agriculture</td>
+                        <td>@basePlan.AgricultureExperts/5</td>
+                        <td>
+                            <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark" @onclick="() => AddExpert(1)">+</button><button class="btn btn-outline-dark" @onclick="() => RemoveExpert(1)">-</button></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Chemistry</td>
+                        <td>@basePlan.ChemistryExperts/5</td>
+                        <td>
+                            <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark" @onclick="() => AddExpert(2)">+</button><button class="btn btn-outline-dark" @onclick="() => RemoveExpert(2)">-</button></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Construction</td>
+                        <td>@basePlan.ConstructionExperts/5</td>
+                        <td>
+                            <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark" @onclick="() => AddExpert(3)">+</button><button class="btn btn-outline-dark" @onclick="() => RemoveExpert(3)">-</button></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Electronics</td>
+                        <td>@basePlan.ElectronicsExperts/5</td>
+                        <td>
+                            <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark" @onclick="() => AddExpert(4)">+</button><button class="btn btn-outline-dark" @onclick="() => RemoveExpert(4)">-</button></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Food Industries</td>
+                        <td>@basePlan.FoodExperts/5</td>
+                        <td>
+                            <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark" @onclick="() => AddExpert(5)">+</button><button class="btn btn-outline-dark" @onclick="() => RemoveExpert(5)">-</button></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Fuel Refining</td>
+                        <td>@basePlan.FuelExperts/5</td>
+                        <td>
+                            <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark" @onclick="() => AddExpert(6)">+</button><button class="btn btn-outline-dark" @onclick="() => RemoveExpert(6)">-</button></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Manufacturing</td>
+                        <td>@basePlan.ManufacturingExperts/5</td>
+                        <td>
+                            <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark" @onclick="() => AddExpert(7)">+</button><button class="btn btn-outline-dark" @onclick="() => RemoveExpert(7)">-</button></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Metallurgy</td>
+                        <td>@basePlan.MetallurgyExperts/5</td>
+                        <td>
+                            <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark" @onclick="() => AddExpert(8)">+</button><button class="btn btn-outline-dark" @onclick="() => RemoveExpert(8)">-</button></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Resource Extraction</td>
+                        <td>@basePlan.ExtractionExperts/5</td>
+                        <td>
+                            <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark" @onclick="() => AddExpert(9)">+</button><button class="btn btn-outline-dark" @onclick="() => RemoveExpert(9)">-</button></div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
-        </div>
-    </div>
-    <div class="card col-sm-12 col-md-4">
-        <div class="card-body">
-            <h5 class="card-title">Efficiency Factors</h5>
-            <hr/>
-            <h6>COGC</h6>
-            <select @bind="basePlan.CogcIndustry">
-                <!-- there has to be a better way to replicate onchange here -->
-                <option value="0" @onclick="RefreshProductionItems">--</option>
-                <option value="1" @onclick="RefreshProductionItems">Agriculture</option>
-                <option value="2" @onclick="RefreshProductionItems">Chemistry</option>
-                <option value="3" @onclick="RefreshProductionItems">Construction</option>
-                <option value="4" @onclick="RefreshProductionItems">Electronics</option>
-                <option value="5" @onclick="RefreshProductionItems">Food Industries</option>
-                <option value="6" @onclick="RefreshProductionItems">Fuel Refining</option>
-                <option value="7" @onclick="RefreshProductionItems">Manufacturing</option>
-                <option value="8" @onclick="RefreshProductionItems">Metallurgy</option>
-                <option value="9" @onclick="RefreshProductionItems">Resource Extraction</option>
-            </select>
-            <hr/>
-            <h6>Experts</h6>
-            <table id="experts" class="table table-striped table-sm">
-            <tbody>
-            <tr>
-                <td>Agriculture</td>
-                <td>@basePlan.AgricultureExperts/5</td>
-                <td>
-                    <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark" @onclick="() => AddExpert(1)">+</button><button class="btn btn-outline-dark" @onclick="() => RemoveExpert(1)">-</button></div>
-                </td>
-            </tr>
-            <tr>
-                <td>Chemistry</td>
-                <td>@basePlan.ChemistryExperts/5</td>
-                <td>
-                    <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark" @onclick="() => AddExpert(2)">+</button><button class="btn btn-outline-dark" @onclick="() => RemoveExpert(2)">-</button></div>
-                </td>
-            </tr>
-            <tr>
-                <td>Construction</td>
-                <td>@basePlan.ConstructionExperts/5</td>
-                <td>
-                    <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark" @onclick="() => AddExpert(3)">+</button><button class="btn btn-outline-dark" @onclick="() => RemoveExpert(3)">-</button></div>
-                </td>
-            </tr>
-            <tr>
-                <td>Electronics</td>
-                <td>@basePlan.ElectronicsExperts/5</td>
-                <td>
-                    <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark" @onclick="() => AddExpert(4)">+</button><button class="btn btn-outline-dark" @onclick="() => RemoveExpert(4)">-</button></div>
-                </td>
-            </tr>
-            <tr>
-                <td>Food Industries</td>
-                <td>@basePlan.FoodExperts/5</td>
-                <td>
-                    <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark" @onclick="() => AddExpert(5)">+</button><button class="btn btn-outline-dark" @onclick="() => RemoveExpert(5)">-</button></div>
-                </td>
-            </tr>
-            <tr>
-                <td>Fuel Refining</td>
-                <td>@basePlan.FuelExperts/5</td>
-                <td>
-                    <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark" @onclick="() => AddExpert(6)">+</button><button class="btn btn-outline-dark" @onclick="() => RemoveExpert(6)">-</button></div>
-                </td>
-            </tr>
-            <tr>
-                <td>Manufacturing</td>
-                <td>@basePlan.ManufacturingExperts/5</td>
-                <td>
-                    <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark" @onclick="() => AddExpert(7)">+</button><button class="btn btn-outline-dark" @onclick="() => RemoveExpert(7)">-</button></div>
-                </td>
-            </tr>
-            <tr>
-                <td>Metallurgy</td>
-                <td>@basePlan.MetallurgyExperts/5</td>
-                <td>
-                    <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark" @onclick="() => AddExpert(8)">+</button><button class="btn btn-outline-dark" @onclick="() => RemoveExpert(8)">-</button></div>
-                </td>
-            </tr>
-            <tr>
-                <td>Resource Extraction</td>
-                <td>@basePlan.ExtractionExperts/5</td>
-                <td>
-                    <div class="btn-group btn-group-sm"><button class="btn btn-sm btn-outline-dark" @onclick="() => AddExpert(9)">+</button><button class="btn btn-outline-dark" @onclick="() => RemoveExpert(9)">-</button></div>
-                </td>
-            </tr>
-            </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+        </div></div>
+</div></div>
