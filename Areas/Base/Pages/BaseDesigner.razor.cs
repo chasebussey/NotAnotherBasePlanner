@@ -93,7 +93,7 @@ public partial class BaseDesigner
         if (basePlan.Buildings.Count > 1)
         {
             CalculateWorkforce();
-            RefreshProductionItems();
+            await RefreshProductionItems();
             StateHasChanged();
         }
     }
@@ -184,7 +184,7 @@ public partial class BaseDesigner
         }
         building.Recipes.Add(recipe);
         await BaseBuildingService.UpdateBaseBuilding(building);
-        ProductionItems.AddRange(CalculateProductionItems(building));
+        CalculateProductionItems(building);
     }
 
     public ProductionItem? GenerateProductionItem(string item, BaseBuildingRecipe recipe, int numBuilding, double efficiency, bool isInput)
@@ -226,12 +226,11 @@ public partial class BaseDesigner
         });
     }
 
-    public List<ProductionItem> CalculateProductionItems(BaseBuilding building)
+    public void CalculateProductionItems(BaseBuilding building)
     {
-        List<ProductionItem> items = new List<ProductionItem>();
         if (building.Recipes is null || building.Recipes.Count == 0)
         {
-            return items;
+            return;
         }
 
         int    numBuilding = building.Quantity;
@@ -244,7 +243,15 @@ public partial class BaseDesigner
                 ProductionItem? item = GenerateProductionItem(input, recipe, numBuilding, efficiency, isInput: true);
                 if (item is not null)
                 {
-                    items.Add(item);
+                    if (ProductionItems.Any(x => x.Material.Ticker == item.Material.Ticker))
+                    {
+                        ProductionItems.First(x => x.Material.Ticker == item.Material.Ticker).Amount += item.Amount;
+                        ProductionItems.First(x => x.Material.Ticker == item.Material.Ticker).Price  += item.Price;
+                    }
+                    else
+                    {
+                        ProductionItems.Add(item);
+                    }
                 }
             }
 
@@ -253,123 +260,22 @@ public partial class BaseDesigner
                 ProductionItem? item = GenerateProductionItem(output, recipe, numBuilding, efficiency, isInput: false);
                 if (item is not null)
                 {
-                    items.Add(item);
+                    if (ProductionItems.Any(x => x.Material.Ticker == item.Material.Ticker))
+                    {
+                        ProductionItems.First(x => x.Material.Ticker == item.Material.Ticker).Amount += item.Amount;
+                        ProductionItems.First(x => x.Material.Ticker == item.Material.Ticker).Price  += item.Price;
+                    }
+                    else
+                    {
+                        ProductionItems.Add(item);
+                    }
                 }
             }
         }
-
-        List<Consumable> tempCon = new List<Consumable>();
-        if (building.Building.Pioneers > 0)
-        {
-            tempCon = Consumables.Where(x => x.WorkforceType.Equals("PIO")).ToList();
-            foreach (Consumable pioCon in tempCon)
-            {
-                double unitPrice =
-                    Prices.First(x => x.MaterialTicker.Equals(pioCon.Ticker) &&
-                                      x.ExchangeCode.Equals("NC1", StringComparison.InvariantCultureIgnoreCase))
-                          .PriceAverage ?? 0.0;
-                double amount = pioCon.Amount * (building.Building.Pioneers / 100.0) * building.Quantity;
-                items.Add(new ProductionItem
-                {
-                    Material = MaterialService.GetMaterialByTicker(pioCon.Ticker),
-                    Amount   = amount,
-                    IsInput  = true,
-                    Recipe   = null,
-                    Price    = unitPrice * amount
-                });
-            }
-        }
-
-        if (building.Building.Settlers > 0)
-        {
-            tempCon = Consumables.Where(x => x.WorkforceType.Equals("SET")).ToList();
-            foreach (Consumable setCon in tempCon)
-            {
-                double unitPrice =
-                    Prices.First(x => x.MaterialTicker.Equals(setCon.Ticker) &&
-                                      x.ExchangeCode.Equals("NC1", StringComparison.InvariantCultureIgnoreCase))
-                          .PriceAverage ?? 0.0;
-                double amount = setCon.Amount * (building.Building.Settlers / 100.0) * building.Quantity;
-                items.Add(new ProductionItem
-                {
-                    Material = MaterialService.GetMaterialByTicker(setCon.Ticker),
-                    Amount   = amount,
-                    IsInput  = true,
-                    Recipe   = null,
-                    Price    = unitPrice * amount
-                });
-            }
-        }
-
-        if (building.Building.Technicians > 0)
-        {
-            tempCon = Consumables.Where(x => x.WorkforceType.Equals("PIO")).ToList();
-            foreach (Consumable tecCon in tempCon)
-            {
-                double unitPrice =
-                    Prices.First(x => x.MaterialTicker.Equals(tecCon.Ticker) &&
-                                      x.ExchangeCode.Equals("NC1", StringComparison.InvariantCultureIgnoreCase))
-                          .PriceAverage ?? 0.0;
-                double amount = tecCon.Amount * (building.Building.Technicians / 100.0) * building.Quantity;
-                items.Add(new ProductionItem
-                {
-                    Material = MaterialService.GetMaterialByTicker(tecCon.Ticker),
-                    Amount   = amount,
-                    IsInput  = true,
-                    Recipe   = null,
-                    Price    = unitPrice * amount
-                });
-            }
-        }
-
-        if (building.Building.Engineers > 0)
-        {
-            tempCon = Consumables.Where(x => x.WorkforceType.Equals("PIO")).ToList();
-            foreach (Consumable engCon in tempCon)
-            {
-                double unitPrice =
-                    Prices.First(x => x.MaterialTicker.Equals(engCon.Ticker) &&
-                                      x.ExchangeCode.Equals("NC1", StringComparison.InvariantCultureIgnoreCase))
-                          .PriceAverage ?? 0.0;
-                double amount = engCon.Amount * (building.Building.Engineers / 100.0) * building.Quantity;
-                items.Add(new ProductionItem
-                {
-                    Material = MaterialService.GetMaterialByTicker(engCon.Ticker),
-                    Amount   = amount,
-                    IsInput  = true,
-                    Recipe   = null,
-                    Price    = unitPrice * amount
-                });
-            }
-        }
-
-        if (building.Building.Scientists > 0)
-        {
-            tempCon = Consumables.Where(x => x.WorkforceType.Equals("PIO")).ToList();
-            foreach (Consumable sciCon in tempCon)
-            {
-                double unitPrice =
-                    Prices.First(x => x.MaterialTicker.Equals(sciCon.Ticker) &&
-                                      x.ExchangeCode.Equals("NC1", StringComparison.InvariantCultureIgnoreCase))
-                          .PriceAverage ?? 0.0;
-                double amount = sciCon.Amount * (building.Building.Scientists / 100.0) * building.Quantity;
-                items.Add(new ProductionItem
-                {
-                    Material = MaterialService.GetMaterialByTicker(sciCon.Ticker),
-                    Amount   = amount,
-                    IsInput  = true,
-                    Recipe   = null,
-                    Price    = unitPrice * amount
-                });
-            }
-        }
-        
-        
-        return items;
     }
 
     // TODO: Make this the whole CalculateProductionItems method
-    public void RefreshProductionItems()
+    public async Task RefreshProductionItems()
     {
         ProductionItems = new List<ProductionItem>();
         ProfitPerDay    = 0.0;
@@ -378,8 +284,10 @@ public partial class BaseDesigner
 
         foreach (BaseBuilding building in basePlan.Buildings)
         {
-            ProductionItems.AddRange(CalculateProductionItems(building));
+            CalculateProductionItems(building);
         }
+
+        await CalculateUpkeep();
 
         foreach (ProductionItem item in ProductionItems)
         {
@@ -395,7 +303,46 @@ public partial class BaseDesigner
         //StateHasChanged();
     }
 
-    public void AddExpert(int type)
+    private async Task CalculateUpkeep()
+    {
+        foreach (string key in workforceFigures.Keys)
+        {
+            List<Consumable> consumables = await ConsumableService.GetConsumablesByWorkforce(key);
+
+            foreach (Consumable con in consumables)
+            {
+                double unitPrice = unitPrice = Prices.First(x => x.MaterialTicker.Equals(con.Ticker) &&
+                                                                 x.ExchangeCode.Equals("NC1", StringComparison.InvariantCultureIgnoreCase))
+                                                     .PriceAverage ?? 0.0;
+
+                double amount = (workforceFigures[key] / 100.0) * con.Amount;
+
+                if (ProductionItems.Any(x => x.IsInput &&
+                                             x.Material.Ticker == con.Ticker))
+                {
+                    ProductionItems.First(x => x.IsInput &&
+                                               x.Material.Ticker == con.Ticker).Amount += amount;
+                    ProductionItems.First(x => x.IsInput &&
+                                               x.Material.Ticker == con.Ticker).Price += (unitPrice * amount);
+                }
+                else
+                {
+                    if (amount > 0)
+                    {
+                        ProductionItems.Add(new ProductionItem
+                        {
+                            Amount   = amount,
+                            IsInput  = true,
+                            Material = MaterialService.GetMaterialByTicker(con.Ticker),
+                            Price    = unitPrice * amount
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    public async Task AddExpert(int type)
     {
         var expertSum = basePlan.AgricultureExperts + basePlan.ChemistryExperts + basePlan.ConstructionExperts +
                        basePlan.ElectronicsExperts + basePlan.FoodExperts + basePlan.FuelExperts +
@@ -446,9 +393,9 @@ public partial class BaseDesigner
                 break;
         }
         
-        RefreshProductionItems();
+        await RefreshProductionItems();
     }
-    public void RemoveExpert(int type)
+    public async Task RemoveExpert(int type)
     {
         switch (type)
         {
@@ -492,20 +439,20 @@ public partial class BaseDesigner
                 break;
         }
         
-        RefreshProductionItems();
+        await RefreshProductionItems();
     }
 
-    public void IncreaseBuildingQuantity(BaseBuilding building)
+    public async Task IncreaseBuildingQuantity(BaseBuilding building)
     {
         building.Quantity++;
-        RefreshProductionItems();
+        await RefreshProductionItems();
     }
 
-    public void DecreaseBuildingQuantity(BaseBuilding building)
+    public async Task DecreaseBuildingQuantity(BaseBuilding building)
     {
         if (building.Quantity > 0)
             building.Quantity--;
-        RefreshProductionItems();
+        await RefreshProductionItems();
     }
 
     public void CalculateWorkforce()
@@ -584,7 +531,7 @@ public partial class BaseDesigner
 
         foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("AGRICULTURE")))
         {
-            building.Efficiency = 1.0 + expertBoost;
+            building.Efficiency = 1.0 + expertBoost + (basePlan.CogcIndustry == 1 ? 0.25 : 0.0);
         }
         
     }
@@ -597,7 +544,7 @@ public partial class BaseDesigner
 
         foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("CHEMISTRY")))
         {
-            building.Efficiency = 1.0 + expertBoost;
+            building.Efficiency = 1.0 + expertBoost + (basePlan.CogcIndustry == 2 ? 0.25 : 0.0);
         }
         
     }
@@ -610,7 +557,7 @@ public partial class BaseDesigner
 
         foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("CONSTRUCTION")))
         {
-            building.Efficiency = 1.0 + expertBoost;
+            building.Efficiency = 1.0 + expertBoost + (basePlan.CogcIndustry == 3 ? 0.25 : 0.0);
         }
     }
 
@@ -622,7 +569,7 @@ public partial class BaseDesigner
 
         foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("ELECTRONICS")))
         {
-            building.Efficiency = 1.0 + expertBoost;
+            building.Efficiency = 1.0 + expertBoost + (basePlan.CogcIndustry == 4 ? 0.25 : 0.0);
         }
     }
 
@@ -634,7 +581,7 @@ public partial class BaseDesigner
         
         foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("FOOD_INDUSTRIES")))
         {
-            building.Efficiency = 1.0 + expertBoost;
+            building.Efficiency = 1.0 + expertBoost + (basePlan.CogcIndustry == 5 ? 0.25 : 0.0);
         }
     }
 
@@ -646,7 +593,7 @@ public partial class BaseDesigner
 
         foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("FUEL_REFINING")))
         {
-            building.Efficiency = 1.0 + expertBoost;
+            building.Efficiency = 1.0 + expertBoost + (basePlan.CogcIndustry == 6 ? 0.25 : 0.0);
         }
     }
 
@@ -658,7 +605,7 @@ public partial class BaseDesigner
 
         foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("MANUFACTURING")))
         {
-            building.Efficiency = 1.0 + expertBoost;
+            building.Efficiency = 1.0 + expertBoost + (basePlan.CogcIndustry == 7 ? 0.25 : 0.0);
         }
     }
 
@@ -670,7 +617,7 @@ public partial class BaseDesigner
 
         foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("METALLURGY")))
         {
-            building.Efficiency = 1.0 + expertBoost;
+            building.Efficiency = 1.0 + expertBoost + (basePlan.CogcIndustry == 8 ? 0.25 : 0.0);
         }
     }
 
@@ -682,7 +629,7 @@ public partial class BaseDesigner
 
         foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("RESOURCE_EXTRACTION")))
         {
-            building.Efficiency = 1.0 + expertBoost;
+            building.Efficiency = 1.0 + expertBoost + (basePlan.CogcIndustry == 9 ? 0.25 : 0.0);
         }
     }
 

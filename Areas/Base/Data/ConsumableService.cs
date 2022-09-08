@@ -20,7 +20,7 @@ public class ConsumableService
 	{
 		return await DbContext.Consumables
 		                      .Where(
-			                      x => x.WorkforceType.Equals(workforce, StringComparison.InvariantCultureIgnoreCase))
+			                      x => x.WorkforceType == workforce)
 		                      .ToListAsync();
 	}
 }

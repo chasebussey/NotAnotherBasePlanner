@@ -21,7 +21,7 @@
             <h6 class="card-subtitle">Resources</h6>
             @foreach (Resource res in planet.Resources)
             {
-                <text><span style="display: inline-block; min-width: 2em">@res.MaterialTicker</span> | <span style="display: inline-block; min-width: 5em">@res.Type</span> | @res.Concentration.ToString("F2")%<br/></text>
+                <text><span style="display: inline-block; min-width: 2em">@res.MaterialTicker</span> | <span style="display: inline-block; min-width: 5em">@res.Type</span> | @res.Concentration.ToString("F2")<br/></text>
             }
         </div>
     </div>
@@ -190,6 +190,22 @@
         <div class="card-body">
             <h5 class="card-title">Efficiency Factors</h5>
             <hr/>
+            <h6>COGC</h6>
+            <select @bind="basePlan.CogcIndustry">
+                <!-- there has to be a better way to replicate onchange here -->
+                <option value="0" @onclick="RefreshProductionItems">--</option>
+                <option value="1" @onclick="RefreshProductionItems">Agriculture</option>
+                <option value="2" @onclick="RefreshProductionItems">Chemistry</option>
+                <option value="3" @onclick="RefreshProductionItems">Construction</option>
+                <option value="4" @onclick="RefreshProductionItems">Electronics</option>
+                <option value="5" @onclick="RefreshProductionItems">Food Industries</option>
+                <option value="6" @onclick="RefreshProductionItems">Fuel Refining</option>
+                <option value="7" @onclick="RefreshProductionItems">Manufacturing</option>
+                <option value="8" @onclick="RefreshProductionItems">Metallurgy</option>
+                <option value="9" @onclick="RefreshProductionItems">Resource Extraction</option>
+            </select>
+            <hr/>
+            <h6>Experts</h6>
             <table id="experts" class="table table-striped table-sm">
             <tbody>
             <tr>

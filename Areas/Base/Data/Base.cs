@@ -21,6 +21,7 @@ public class Base
 	public int? Permits { get; set; }
 	public int AvailableArea { get; set; } = 500;
 	public int UsedArea { get; set; }
+	public int CogcIndustry { get; set; }
 
 	public Planet Planet { get; set; }
 }
