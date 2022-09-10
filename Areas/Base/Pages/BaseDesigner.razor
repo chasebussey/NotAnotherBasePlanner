@@ -76,6 +76,7 @@
                                 </div>
                                 <hr/>
                                 Constructed? <input class="form-check-input" type="checkbox" @bind="@building.Constructed"></input> <br/>
+                                Area: @(building.Building.AreaCost * building.Quantity) <br />
                                 Efficiency: @building.Efficiency <br/>
                                 Recipe(s): <br/>
                                 <select class="form-select d-flex" @onchange="(e) => SelectedRecipeChanged(e, building)">

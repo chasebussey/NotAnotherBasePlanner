@@ -93,6 +93,7 @@ public partial class BaseDesigner
         if (basePlan.Buildings.Count > 1)
         {
             CalculateWorkforce();
+            CalculateArea();
             await RefreshProductionItems();
             StateHasChanged();
         }
@@ -506,6 +507,15 @@ public partial class BaseDesigner
                 default:
                     break;
             }
+        }
+    }
+
+    public void CalculateArea()
+    {
+        basePlan.UsedArea = 0;
+        foreach (BaseBuilding building in basePlan.Buildings)
+        {
+            basePlan.UsedArea += (building.Building.AreaCost * building.Quantity);
         }
     }
 
