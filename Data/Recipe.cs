@@ -45,5 +45,4 @@ public class IOToStringArrayConverter : JsonConverter<string[]>
 internal class IOItem
 {
 	public string Ticker { get; set; }
-	public int Amount { get; set; }
 }

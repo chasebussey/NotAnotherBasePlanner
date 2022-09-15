@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Identity;
 using NotAnotherBasePlanner.Data;
 using NotAnotherBasePlanner.Pages;
@@ -45,6 +46,7 @@ public partial class BaseDesigner
     [Inject] private PriceService PriceService { get; set; }
     [Inject] private ConsumableService ConsumableService { get; set; }
     [Inject] private UserPriceService UserPriceService { get; set; }
+    [Inject] private ProtectedLocalStorage ProtectedLocalStorage { get; set; }
     #endregion
 
     private string PlanetGravity => planet switch
@@ -94,8 +96,34 @@ public partial class BaseDesigner
         {
             CalculateWorkforce();
             CalculateArea();
-            await RefreshProductionItems();
+            //await RefreshProductionItems();
             StateHasChanged();
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var result = await ProtectedLocalStorage.GetAsync <List<ProductionItem>>(basePlan.Id.ToString());
+
+            if (result.Success)
+            {
+                if (result.Value != null)
+                {
+                    ProductionItems = result.Value;
+                    CalculateProfit();
+                    StateHasChanged();
+                }
+                else
+                {
+                    await RefreshProductionItems();
+                }
+            }
+            else
+            {
+                await RefreshProductionItems();
+            }
         }
     }
 
@@ -190,7 +218,7 @@ public partial class BaseDesigner
 
     public ProductionItem? GenerateProductionItem(string item, BaseBuildingRecipe recipe, int numBuilding, double efficiency, bool isInput)
     {
-        if (ProductionItems.Any(x => x.Material.Ticker == item && x.Recipe == recipe.Recipe))
+        if (ProductionItems.Any(x => x.Material.Ticker == item && x.Recipe == recipe.Recipe.RecipeName))
         {
             return null;
         }
@@ -222,7 +250,7 @@ public partial class BaseDesigner
             Material = mat,
             Amount   = numBuilding * efficiency * inputSize * alloc,
             IsInput  = isInput,
-            Recipe   = recipe.Recipe,
+            Recipe   = recipe.Recipe.RecipeName,
             Price    = price
         });
     }
@@ -287,6 +315,8 @@ public partial class BaseDesigner
         {
             CalculateProductionItems(building);
         }
+
+        await ProtectedLocalStorage.SetAsync(basePlan.Id.ToString(), ProductionItems);
 
         await CalculateUpkeep();
 
@@ -694,11 +724,11 @@ public partial class BaseDesigner
         basePlan.Buildings = sortedBaseBuildings;
     }
 
-    public void ToggleIgnoreItem(ProductionItem item)
+    public async Task ToggleIgnoreItem(ProductionItem item)
     {
-        item.IsIgnored = !item.IsIgnored;
+        ProductionItems.First(x => x.Material.Ticker == item.Material.Ticker).IsIgnored = !item.IsIgnored;
         CalculateProfit();
-        SortProductionItems();
+        await SortProductionItems();
     }
 
     public string StyleIgnoredItem(bool isIgnored, bool cost)
@@ -706,7 +736,7 @@ public partial class BaseDesigner
         return isIgnored ? "color:grey" : cost ? "color: red" : "";
     }
 
-    public void SortProductionItems()
+    public async Task SortProductionItems()
     {
         // Just like SortBuildings(), just make a new list and replace
         List<ProductionItem> sortedProdItems = new List<ProductionItem>();
@@ -715,6 +745,8 @@ public partial class BaseDesigner
         sortedProdItems.AddRange(ProductionItems.Where(x => x.IsIgnored));
 
         ProductionItems = sortedProdItems;
+
+        await ProtectedLocalStorage.SetAsync(basePlan.Id.ToString(), ProductionItems);
     }
 }
 
@@ -723,7 +755,7 @@ public class ProductionItem {
     public double Amount { get; set; }
     public bool IsInput { get; set; }
     public bool IsIgnored { get; set; }
-    public Recipe Recipe { get; set; }
+    public string Recipe { get; set; }
     
     public double Price { get; set; }
 }

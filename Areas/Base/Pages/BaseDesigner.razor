@@ -156,7 +156,7 @@
                     <tbody>
                     @foreach (ProductionItem item in ProductionItems.Where(x => x.IsInput))
                     {
-                        <tr @onclick="() => ToggleIgnoreItem(item)" style="@StyleIgnoredItem(item.IsIgnored, cost: false)">
+                        <tr @onclick="async () => await ToggleIgnoreItem(item)" style="@StyleIgnoredItem(item.IsIgnored, cost: false)">
                             <td>
                                 @item.Material.Ticker
                             </td>
