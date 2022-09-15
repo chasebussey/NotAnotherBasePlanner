@@ -290,18 +290,27 @@ public partial class BaseDesigner
 
         await CalculateUpkeep();
 
+        CalculateProfit();
+        StateHasChanged();
+    }
+
+    private void CalculateProfit()
+    {
+        ProfitPerDay = 0;
         foreach (ProductionItem item in ProductionItems)
         {
             if (item.IsInput)
             {
-                ProfitPerDay -= item.Price;
+                if (!item.IsIgnored)
+                {
+                    ProfitPerDay -= item.Price;
+                }
             }
             else
             {
                 ProfitPerDay += item.Price;
             }
         }
-        //StateHasChanged();
     }
 
     private async Task CalculateUpkeep()
@@ -504,6 +513,22 @@ public partial class BaseDesigner
                 case "HB5":
                     workforceCapacity["SCI"] += 100 * building.Quantity;
                     break;
+                case "HBB":
+                    workforceCapacity["PIO"] += 75 * building.Quantity;
+                    workforceCapacity["SET"] += 75 * building.Quantity;
+                    break;
+                case "HBC":
+                    workforceCapacity["SET"] += 75 * building.Quantity;
+                    workforceCapacity["TEC"] += 75 * building.Quantity;
+                    break;
+                case "HBL":
+                    workforceCapacity["ENG"] += 75 * building.Quantity;
+                    workforceCapacity["SCI"] += 75 * building.Quantity;
+                    break;
+                case "HBM":
+                    workforceCapacity["TEC"] += 75 * building.Quantity;
+                    workforceCapacity["ENG"] += 75 * building.Quantity;
+                    break;
                 default:
                     break;
             }
@@ -537,7 +562,7 @@ public partial class BaseDesigner
     public void CalculateAgriculture()
     {
         double expertBoost = ExpertBoost(basePlan.AgricultureExperts);
-        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("AGRICULTURE"))) return;
+        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise is "AGRICULTURE")) return;
 
         foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("AGRICULTURE")))
         {
@@ -550,9 +575,9 @@ public partial class BaseDesigner
     {
         double expertBoost = ExpertBoost(basePlan.ChemistryExperts);
 
-        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("CHEMISTRY"))) return;
+        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise is "CHEMISTRY")) return;
 
-        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("CHEMISTRY")))
+        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise is "CHEMISTRY"))
         {
             building.Efficiency = 1.0 + expertBoost + (basePlan.CogcIndustry == 2 ? 0.25 : 0.0);
         }
@@ -563,9 +588,9 @@ public partial class BaseDesigner
     {
         double expertBoost = ExpertBoost(basePlan.ConstructionExperts);
         
-        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("CONSTRUCTION"))) return;
+        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise is "CONSTRUCTION")) return;
 
-        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("CONSTRUCTION")))
+        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise is "CONSTRUCTION"))
         {
             building.Efficiency = 1.0 + expertBoost + (basePlan.CogcIndustry == 3 ? 0.25 : 0.0);
         }
@@ -575,9 +600,9 @@ public partial class BaseDesigner
     {
         double expertBoost = ExpertBoost(basePlan.ElectronicsExperts);
         
-        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("ELECTRONICS"))) return;
+        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise is "ELECTRONICS")) return;
 
-        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("ELECTRONICS")))
+        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise is "ELECTRONICS"))
         {
             building.Efficiency = 1.0 + expertBoost + (basePlan.CogcIndustry == 4 ? 0.25 : 0.0);
         }
@@ -587,9 +612,9 @@ public partial class BaseDesigner
     {
         double expertBoost = ExpertBoost(basePlan.FoodExperts);
 
-        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("FOOD_INDUSTRIES"))) return;
+        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise is "FOOD_INDUSTRIES")) return;
         
-        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("FOOD_INDUSTRIES")))
+        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise is "FOOD_INDUSTRIES"))
         {
             building.Efficiency = 1.0 + expertBoost + (basePlan.CogcIndustry == 5 ? 0.25 : 0.0);
         }
@@ -599,9 +624,9 @@ public partial class BaseDesigner
     {
         double expertBoost = ExpertBoost(basePlan.FuelExperts);
         
-        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("FUEL_REFINING"))) return;
+        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise is "FUEL_REFINING")) return;
 
-        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("FUEL_REFINING")))
+        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise is "FUEL_REFINING"))
         {
             building.Efficiency = 1.0 + expertBoost + (basePlan.CogcIndustry == 6 ? 0.25 : 0.0);
         }
@@ -611,9 +636,9 @@ public partial class BaseDesigner
     {
         double expertBoost = ExpertBoost(basePlan.ManufacturingExperts);
         
-        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("MANUFACTURING"))) return;
+        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise is "MANUFACTURING")) return;
 
-        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("MANUFACTURING")))
+        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise is "MANUFACTURING"))
         {
             building.Efficiency = 1.0 + expertBoost + (basePlan.CogcIndustry == 7 ? 0.25 : 0.0);
         }
@@ -623,9 +648,9 @@ public partial class BaseDesigner
     {
         double expertBoost = ExpertBoost(basePlan.MetallurgyExperts);
         
-        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("METALLURGY"))) return;
+        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise is "METALLURGY")) return;
 
-        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("METALLURGY")))
+        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise is "METALLURGY"))
         {
             building.Efficiency = 1.0 + expertBoost + (basePlan.CogcIndustry == 8 ? 0.25 : 0.0);
         }
@@ -635,9 +660,9 @@ public partial class BaseDesigner
     {
         double expertBoost = ExpertBoost(basePlan.FoodExperts);
         
-        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("RESOURCE_EXTRACTION"))) return;
+        if (!basePlan.Buildings.Any(x => x.BuildingTicker != "CM" && x.Building.Expertise is "RESOURCE_EXTRACTION")) return;
 
-        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise.Equals("RESOURCE_EXTRACTION")))
+        foreach (var building in basePlan.Buildings.Where(x => x.BuildingTicker != "CM" && x.Building.Expertise is "RESOURCE_EXTRACTION"))
         {
             building.Efficiency = 1.0 + expertBoost + (basePlan.CogcIndustry == 9 ? 0.25 : 0.0);
         }
@@ -656,12 +681,48 @@ public partial class BaseDesigner
         };
     }
     #endregion
+
+    public void SortBuildings()
+    {
+        // Just make a new list with production buildings at the front
+        List<BaseBuilding> sortedBaseBuildings = new List<BaseBuilding>();
+
+        sortedBaseBuildings.AddRange(basePlan.Buildings.Where(x => x.Building.Expertise is not null));
+        
+        sortedBaseBuildings.AddRange(basePlan.Buildings.Where(x => x.Building.Expertise is null));
+
+        basePlan.Buildings = sortedBaseBuildings;
+    }
+
+    public void ToggleIgnoreItem(ProductionItem item)
+    {
+        item.IsIgnored = !item.IsIgnored;
+        CalculateProfit();
+        SortProductionItems();
+    }
+
+    public string StyleIgnoredItem(bool isIgnored, bool cost)
+    {
+        return isIgnored ? "color:grey" : cost ? "color: red" : "";
+    }
+
+    public void SortProductionItems()
+    {
+        // Just like SortBuildings(), just make a new list and replace
+        List<ProductionItem> sortedProdItems = new List<ProductionItem>();
+        
+        sortedProdItems.AddRange(ProductionItems.Where(x => !x.IsIgnored));
+        sortedProdItems.AddRange(ProductionItems.Where(x => x.IsIgnored));
+
+        ProductionItems = sortedProdItems;
+    }
 }
 
 public class ProductionItem {
     public Material Material { get; set; }
     public double Amount { get; set; }
     public bool IsInput { get; set; }
+    public bool IsIgnored { get; set; }
     public Recipe Recipe { get; set; }
     
     public double Price { get; set; }
